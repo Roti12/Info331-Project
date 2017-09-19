@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css?family=Indie+Flower|Noto+Serif');
+/*fonts*/
+#ps{
+	font-family: 'Indie Flower', cursive;
+	font-size: -webkit-xxx-large;
+}
+
+#wrapper{
+	font-family: 'Roboto';
+	font-size: 22px;	
+	text-align: center;
+	background-color: cadetblue;
+	color:#fff;
+}
+	
+input{
+	width:85%;
+	text-align:center;
+	padding:1em;
+}
+
+#knapp{
+	width:85%;
+	color:#fff;
+	background-color: #ffaa00;
+	border-color: #ff9800;
+	padding:1em;
+}
+
+#linken{
+	color:#fff;
+	font-size: small;
+}
+
+#ce{
+	font-size:10px;
+}
+
+#ce input{
+	width:40%;
+	padding:0;
+	color: #475c66;
+}
+#bilder{
+	margin:auto;
+	font-size: x-small;
+}#bilder img{
+	padding:1em;
+}
+#tid{
+	margin:1em;
+    color: #fff;
+    background-color: #ffaa00;
+	border-style: solid;
+    border-color: #e18600;
+    text-align: center;
+}
+#gallary{
+	margin:auto;
+	padding:1em;
+}
+#gallary img{
+	width:90%;
+	border: solid;
+}
+.logo{
+	width:30%;
+}
+.logo2{
+	width:20%;
+}
+#lastned{
+	width:10%;}
+
+
+@media only screen and (min-width: 768px) {
+
+.logo{
+	width:10%;
+}.logo2{
+	width:5%;
+}
+#lastned{
+	width:2%;}
+#ce{
+	font-size:1em;
+	width: 60%;
+    margin: auto;
+}
+#knapp, input{
+width: 60%;}
+#gallary img{
+	width:35%;
+	border: solid;
+}
+
+#bilder{
+font-size: xx-large;
+}
+
+#tid{
+	margin:auto;
+width:60%;
+}
+
+}
