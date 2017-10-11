@@ -20,7 +20,7 @@ SELECT images.id, images.event_code, create_event.event_name, images.image_path,
 
 module.exports = {
 retrieveEvent : function() {
-  connection.query("select * from create_event where event_code =? ", [120321], function(err, rows) {
+  connection.query("SELECT * FROM create_event WHERE event_code =? ", [120321], function(err, rows) {
     if(err) {
         console.log(err);
         return;
@@ -34,5 +34,19 @@ retrieveEvent : function() {
         console.log("Connection closed");
     })
 })  
-}
+},
+    insertImage : function(arrayValues) {
+        var stringQuery = "INSERT INTO image_table (image_name, image_path, size, upl_date, event_code) VALUES ?";
+        var eventCode = 1000;
+        var values = [[arrayValues[0], arrayValues[1], arrayValues[2], new Date().toLocaleString(), eventCode]];
+        
+        connection.query(stringQuery, [values], function(err, result){
+            if(err) throw err;
+            console.log("Number of records inserted: " + result.affectedRows);
+        })
+        
+        connection.end(function() {
+        console.log("Connection closed");
+    })
+    }
 }

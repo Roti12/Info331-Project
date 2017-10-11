@@ -1,10 +1,12 @@
-<html>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-        <title>Event Photos App</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta charset="UTF-8">
+        <meta charset="utf-8" />
+        <title>Upload images to server</title>
     </head>
     <body>
-        Hello World!cdas
+        <form id="frmUploader" enctype="multipart/form-data" action="api/Upload/" method="post">
+        <input type="file" name="file" multiple />
+        <input type="submit" name="submit" id="btnSubmit" value="Upload" /> </form>
     </body>
 </html>
