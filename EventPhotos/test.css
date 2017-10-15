@@ -112,7 +112,7 @@ textarea.question + label > span {
   transition: top 0.2s ease, font-size 0.2s ease, color 0.2s ease;
 }
 
-input[type="submit"] {
+input[type="btnEnter"] {
   -webkit-transition: opacity 0.2s ease, background 0.2s ease;
   transition: opacity 0.2s ease, background 0.2s ease;
   display: block;
@@ -122,20 +122,20 @@ input[type="submit"] {
   cursor: pointer;
 }
 
-input[type="submit"]:hover {
+input[type="btnEnter"]:hover {
   background: #EEE;
 }
 
-input[type="submit"]:active {
+input[type="btnEnter"]:active {
   background: #999;
 }
 
-#eventCodeTextField.question:valid ~ input[type="submit"], textarea.question:valid ~ input[type="submit"] {
+#eventCodeTextField.question:valid ~ input[type="btnEnter"], textarea.question:valid ~ input[type="btnEnter"] {
   -webkit-animation: appear 1s forwards;
   animation: appear 1s forwards;
 }
 
-#eventCodeTextField.question:invalid ~ input[type="submit"], textarea.question:invalid ~ input[type="submit"] {
+#eventCodeTextField.question:invalid ~ input[type="btnEnter"], textarea.question:invalid ~ input[type="btnEnter"] {
   display: none;
 }
 

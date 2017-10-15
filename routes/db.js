@@ -48,5 +48,24 @@ retrieveEvent : function() {
         connection.end(function() {
         console.log("Connection closed");
     })
+    },
+    
+    retrieveImagesByEventCode : function(eventCode, callback) {
+        var imagePathArray = [];
+        connection.query("SELECT image_path FROM image_table WHERE event_code =?", [eventCode], function(err, rows) {
+            if(err) {
+                console.log(err);
+                return;
+            }
+            
+            rows.forEach(function(result){
+                imagePathArray.push(result.image_path); 
+            })
+            
+            
+            connection.end();
+            callback(imagePathArray);
+        })
+    
     }
 }

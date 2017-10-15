@@ -10,6 +10,7 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use("/EventPhotos", express.static("EventPhotos"));
+app.use("/images", express.static("images"));
 
 const db = require('./routes/db.js');
 
@@ -54,17 +55,58 @@ app.post("/api/Upload", function(req, res) {
 })
 
 app.post("/api/Gallery", function(req, res) {
+    var imagePaths = [];
     upload(req, res, function(err) {
         if(err) {
             return res.end("Something went wrong");
         }
         
         var eCode = req.body.eventCodeText;
-        console.log(eCode);
+        db.retrieveImagesByEventCode(eCode, function(data) {
+            pushImages(data);
+        })
+        
+        function pushImages(data) {
+            for (var i in data) {
+                imagePaths.push(data[i]);
+            }
+            
+     if(imagePaths.length > 0) {
+            // do something
+            var images = "";          
+         for(var i in imagePaths) {
+             images += "<img style='max-width:400px; display:inline-block;' src='../../" + imagePaths[i] + "'>";
+         }
+         
+        res.end(buildHtml(req,images));
+
+        } else {
+            res.end("THIS EVENT DOES NOT EXIST");
+        }
+            
+
+        }
+        
     })
     
-    return res.end("Event code exists");
+    
+function buildHtml(req,images) {
+  var header = '';
+
+  // concatenate header string
+  // concatenate body string
+
+  return '<!DOCTYPE html>'
+       + '<html><header>' 
+      + header +
+      '</header><body>' 
+      + images + 
+      '</body></html>';
+}
+    
+    
 })
+
 
 app.listen(port, function() {
    console.log("Server running on port: " + port + ".."); 
