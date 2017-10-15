@@ -6,6 +6,9 @@ const app = express();
 const port = 3000;
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
 
 const db = require('./routes/db.js');
 
@@ -47,6 +50,19 @@ app.post("/api/Upload", function(req, res) {
     return res.end("Image uploaded successfully!");
     
 })
+})
+
+app.post("/api/Gallery", function(req, res) {
+    upload(req, res, function(err) {
+        if(err) {
+            return res.end("Something went wrong");
+        }
+        
+        var eCode = req.body.eventCodeText;
+        console.log(eCode);
+    })
+    
+    return res.end("Event code exists");
 })
 
 app.listen(port, function() {
