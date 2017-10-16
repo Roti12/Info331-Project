@@ -71,7 +71,7 @@ app.post("/api/Gallery", function(req, res) {
                 imagePaths.push(data[i]);
             }
             
-     if(imagePaths.length > 0) {
+     if(imagePaths.length > 0 && imagePaths !== "undefined") {
             // do something
             var images = "";          
          for(var i in imagePaths) {
@@ -82,11 +82,8 @@ app.post("/api/Gallery", function(req, res) {
 
         } else {
             res.end("THIS EVENT DOES NOT EXIST");
-        }
-            
-
-        }
-        
+            }
+        } 
     })
     
     

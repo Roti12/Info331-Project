@@ -30,9 +30,6 @@ retrieveEvent : function() {
         console.log(result.event_code, result.password, result.adm_password, result.location, result.start_date, result.end_date, result.capacity, result.event_name);
     })
     
-    connection.end(function() {
-        console.log("Connection closed");
-    })
 })  
 },
     insertImage : function(arrayValues) {
@@ -44,10 +41,6 @@ retrieveEvent : function() {
             if(err) throw err;
             console.log("Number of records inserted: " + result.affectedRows);
         })
-        
-        connection.end(function() {
-        console.log("Connection closed");
-    })
     },
     
     retrieveImagesByEventCode : function(eventCode, callback) {
@@ -62,8 +55,6 @@ retrieveEvent : function() {
                 imagePathArray.push(result.image_path); 
             })
             
-            
-            connection.end();
             callback(imagePathArray);
         })
     
