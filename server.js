@@ -16,13 +16,14 @@ const db = require('./routes/db.js');
 
 
 const storage = multer.diskStorage({
-    destination: function(req, file, callback) {
+    destination: function (req, file, callback) {
         callback(null, "./images");
     },
-    filename: function(req, file, callback) {
+    filename: function (req, file, callback) {
         callback(null, file.fieldname + "_" + Date.now() + "_" + file.originalname);
+        // new Date().toLocaleString() does not work
     }
-})
+});
 
 
 const upload = multer({
@@ -30,84 +31,95 @@ const upload = multer({
 }).array("file", 3);
 
 
-app.get("/", function(req, res) {
+app.get("/", function (req, res) {
     res.sendFile(__dirname + "/EventPhotos/index.html");
-     //db.retrieveEvent();
-})
+    //db.retrieveEvent();
+});
 
-app.post("/api/Upload", function(req, res) {
-    upload(req, res, function(err) {
+app.post("/api/events/:eventcode/images", function (req, res) {
+    upload(req, res, function (err) {
         if (err) {
-            return res.end("Something went wrong!");
-        } 
-        
-    var tempImages = [];
-    req.files.forEach(function(element){
-    tempImages.push(element.originalname, element.path, element.size);
-})
-
-    JSON.stringify(tempImages);
-        
-    db.insertImage(tempImages);    
-    return res.end("Image uploaded successfully!");
-    
-})
-})
-
-app.post("/api/Gallery", function(req, res) {
-    var imagePaths = [];
-    upload(req, res, function(err) {
-        if(err) {
-            return res.end("Something went wrong");
+            console.log(err);
+            return res.status(500).end("Something went wrong!");
         }
-        
-        var eCode = req.body.eventCodeText;
-        db.retrieveImagesByEventCode(eCode, function(data) {
-            pushImages(data);
-        })
-        
-        function pushImages(data) {
+        var eventCode = req.params.eventcode;
+
+        var tempImages = [];
+        req.files.forEach(function (element) {
+            var image = {
+                name: element.originalname,
+                path: element.path,
+                size: element.size
+            };
+            tempImages.push(image);
+        });
+
+        db.insertImage(eventCode, tempImages[0], function(imageId) {
+            res.location("/api/events/"+eventCode+"/images/"+imageId);
+            return res.status(201).send("Successfully inserted image!");
+        });
+
+    });
+});
+
+app.get("/api/events/:eventcode/images", function (req, res) {
+    var imagePaths = [];
+    upload(req, res, function (err) {
+        if (err) {
+            console.log(err);
+            return res.status(500).end("Something went wrong");
+        }
+
+        var eCode = req.params.eventcode;
+        db.doesEventCodeExist(eCode, function (eventCodeExists) {
+            if(!eventCodeExists) {
+                return res.status(404).send(imagePaths);
+            }
+            db.retrieveImagesByEventCode(eCode, function (data) {
+                prepareResponse(data);
+                return res.send(imagePaths);
+            });
+        });
+
+        function prepareResponse(data) {
             for (var i in data) {
                 imagePaths.push(data[i]);
             }
-            
-     if(imagePaths.length > 0) {
-            // do something
-            var images = "";          
-         for(var i in imagePaths) {
-             images += "<img style='max-width:400px; display:inline-block;' src='../../" + imagePaths[i] + "'>";
-         }
-         
-        res.end(buildHtml(req,images));
 
-        } else {
-            res.end("THIS EVENT DOES NOT EXIST");
+            if (imagePaths.length <= 0) {
+                res.status(204);
+
+            }
         }
-            
 
-        }
-        
-    })
-    
-    
-function buildHtml(req,images) {
-  var header = '';
-
-  // concatenate header string
-  // concatenate body string
-
-  return '<!DOCTYPE html>'
-       + '<html><header>' 
-      + header +
-      '</header><body>' 
-      + images + 
-      '</body></html>';
-}
-    
-    
-})
-
-
-app.listen(port, function() {
-   console.log("Server running on port: " + port + ".."); 
+    });
 });
+
+app.get("/api/events/:eventcode/images/:imageid", function (req, res) {
+    upload(req, res, function (err) {
+        if (err) {
+            console.log(err);
+            return res.status(500).end("Something went wrong");
+        }
+
+        var eCode = req.params.eventcode;
+        var imageId = req.params.imageid;
+        db.doesEventCodeExist(eCode, function (eventCodeExists) {
+            if(!eventCodeExists) {
+                return res.status(404).end("Event with code " + eCode + "does not exist!");
+            }
+            db.retrieveImageById(eCode, imageId, function (image) {
+                if (!image.hasOwnProperty("path")) {
+                    return res.status(404).end("Image with id " + imageId + " does not exist!");
+                }
+                return res.send(image);
+            });
+        });
+    });
+});
+
+app.listen(port, function () {
+    console.log("Server running on port: " + port + "..");
+});
+
+module.exports = app;

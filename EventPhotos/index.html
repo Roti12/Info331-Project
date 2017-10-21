@@ -6,7 +6,7 @@
         <link rel="stylesheet" type="text/css" href="/EventPhotos/test.css">
     </head>
     <body>
-        <form id="frmUploader" enctype="multipart/form-data" action="api/Upload/" method="post">
+        <form id="frmUploader" enctype="multipart/form-data" action="api/events/1000/Upload/" method="post">
         <input type="file" name="file" multiple />
         <input type="submit" name="submit" id="btnSubmit" value="Upload" /> </form>
         
@@ -16,7 +16,7 @@
         
         
         
-        <form id="eventCodeEnter" enctype="multipart/form-data" action="api/Gallery/" method="post">
+        <form id="eventCodeEnter" enctype="multipart/form-data" action="api/Gallery/" method="get">
             
             <input type="text" id="eventCodeTextField" name="eventCodeText" class="question" required autocomplete="off"/>
             <label for="eventCodeTextField"><span>Enter Event Code here</span></label>
