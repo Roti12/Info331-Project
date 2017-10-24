@@ -7,6 +7,8 @@ const testDb = {
     database: "info331test",
     port: 3306
 };
+
+//CREATE A POOL INSTEAD?
 const prodDb = {
     host: "sql11.freemysqlhosting.net",
     user: "sql11198291",
@@ -19,8 +21,8 @@ const prodDb = {
     //thisisnotkahoot
 };
 
-var connection;
-if (process.env.NODE_ENV === 'test') {
+var connection = mysql.createConnection(prodDb)
+f (process.env.NODE_ENV === 'test') {
     connection = mysql.createConnection(testDb);
 } else {
     connection = mysql.createConnection(prodDb);
@@ -47,17 +49,32 @@ module.exports = {
         });
 
     },
-    retrieveEvent: function () {
-        connection.query("SELECT * FROM create_event WHERE event_code =? ", [120321], function (err, rows) {
-            if (err) {
-                console.log(err);
-                return;
+    retrieveEvent : function(eventCode, callback) {
+
+      var tempObject = [];
+      connection.query("SELECT * FROM create_event WHERE event_code =? ", [eventCode], function(err, rows) {
+        if(err) {
+            console.log(err);
+            return;
+        }
+
+        rows.forEach(function(result) {
+            tempObject = {
+                eCode : result.event_code,
+                pass : result.opt_password,
+                admPass : result.adm_password,
+                place : result.location,
+                start : result.start_date,
+                end : result.end_date,
+                cap : result.capacity,
+                desc : result.description
             }
 
-            rows.forEach(function (result) {
-                console.log(result.event_code, result.password, result.adm_password, result.location, result.start_date, result.end_date, result.capacity, result.event_name);
-            });
         })
+
+          callback(tempObject);
+
+    })  
     },
     insertEvent: function (event) {
         var stringQuery = "INSERT INTO events (event_code, opt_password, admin_password, start_date, end_date, location, description) VALUES ?";

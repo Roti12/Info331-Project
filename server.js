@@ -13,6 +13,7 @@ app.use("/EventPhotos", express.static("EventPhotos"));
 app.use("/images", express.static("images"));
 
 const db = require('./routes/db.js');
+const auth = require('./routes/authentication.js');
 
 
 const storage = multer.diskStorage({
@@ -33,7 +34,16 @@ const upload = multer({
 
 app.get("/", function (req, res) {
     res.sendFile(__dirname + "/EventPhotos/index.html");
-    //db.retrieveEvent();
+    /*auth.checkForPassword(12345, function(bool) {
+        if(bool) { // CHECKS IF THERE IS A PASSWORD
+            console.log("PASSWORD REQUIRED");
+            auth.checkIfCorrectlyEntered(12345, "hello", function(boolOne) {
+                if(boolOne) console.log("Success"); // TRUE IF PASSWORD SUCCESSFULLY ENTERED - EITHER NORMAL PW OR ADMIN PW
+                else console.log("Wrong password"); // FALSE IF INCORRECTLY ENTERED
+            });
+        } else console.log("SUCCESS - NO PASSWORD REQUIRED"); // NO PASSWORD
+    });*/
+
 });
 
 app.post("/api/events/:eventcode/images", function (req, res) {
