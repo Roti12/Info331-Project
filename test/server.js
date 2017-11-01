@@ -22,9 +22,9 @@ describe('Images', () => {
     });
 
     /*
-      * Test the /GET route
+      * Test the /GET route for /api/events/:eventcode/images
       */
-    describe('/GET image', () => {
+    describe('/GET /api/events/:eventcode/images', () => {
         it('it should GET all the images for the specified event', (done) => {
             var event = {
                 code: 1000,
@@ -80,6 +80,13 @@ describe('Images', () => {
                     done();
                 });
         });
+
+    });
+
+/*
+  * Test the /GET route for /api/events/:eventcode/images/:imageid
+  */
+    describe('/GET /api/events/:eventcode/images/:imageid', () => {
         it('it should GET the image for the specified event and the specified id', (done) => {
             var event = {
                 code: 1000,
@@ -119,22 +126,68 @@ describe('Images', () => {
                 description: null
 
             };
-            var image = {
-                name: 'test.jpg',
-                path: 'test/test.jpg',
-                size: '23423'
-            };
             db.insertEvent(event);
+            var imageId = 1;
 
             chai.request(server)
-                .get('/api/events/1000/images/1')
+                .get('/api/events/1000/images/' + imageId)
                 .end((err, res) => {
                     res.should.have.status(404);
+                    res.text.should.contain(imageId);
                     done();
                 });
+        });
+        it('it should GET a 404 if the event with the specified code does not exist', (done) => {
+            var eventCode = 1000;
+            chai.request(server)
+                .get('/api/events/' + eventCode + '/images/1')
+                .end((err, res) => {
+                    res.should.have.status(404);
+                    res.text.should.contain(eventCode);
+                    done();
+                });
+        });
     });
+
+    /*
+  * Test the /GET route for /api/events/:eventcode
+  */
+    describe('/GET /api/events/:eventcode', () => {
+        it('it should GET the event for the specified code', (done) => {
+            var event = {
+                code: 1000,
+                optPassword: null,
+                adminPassword: null,
+                startDate: null,
+                endDate: null,
+                location: null,
+                description: null
+
+            };
+            db.insertEvent(event);
+            chai.request(server)
+                .get('/api/events/1000')
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.a('object');
+                    res.body.should.have.property("code");
+                    res.body.code.should.contain(1000);
+                    done();
+                });
+        });
+        it('it should GET a 404 if the event with the specified code does not exist', (done) => {
+            var eventCode = 1000;
+            chai.request(server)
+                .get('/api/events/' + eventCode)
+                .end((err, res) => {
+                    res.should.have.status(404);
+                    res.text.should.contain(eventCode);
+                    done();
+                });
+        });
     });
-    describe('/POST image', () => {
+
+        describe('/POST image', () => {
         it('it should POST an image and return status 201', (done) => {
             var event = {
                 code: 1000,
@@ -157,5 +210,29 @@ describe('Images', () => {
                     done();
                 });
         });
+    });
+    /*
+* Test the /DELETE route for /api/events/:eventcode
+*/
+    describe('/DELETE /api/events/:eventcode', () => {
+        it('it should DELETE the event with the specified code'), (done) => {
+            var event = {
+                code: 1000,
+                optPassword: null,
+                adminPassword: null,
+                startDate: null,
+                endDate: null,
+                location: null,
+                description: null
+            };
+            db.insertEvent(event);
+            chai.request(server)
+                .delete('/api/events/1000')
+                .end((err, res) => {
+                    res.should.have.status(204);
+                    done();
+                });
+
+        }
     });
 });

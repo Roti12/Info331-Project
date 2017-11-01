@@ -22,7 +22,7 @@ const prodDb = {
 };
 
 var connection = mysql.createConnection(prodDb)
-f (process.env.NODE_ENV === 'test') {
+if (process.env.NODE_ENV === 'test') {
     connection = mysql.createConnection(testDb);
 } else {
     connection = mysql.createConnection(prodDb);
@@ -75,6 +75,28 @@ module.exports = {
           callback(tempObject);
 
     })  
+    },
+    retrieveEventByEventCode: function (eventCode, callback) {
+        connection.query("SELECT * FROM events WHERE event_code = ? ", [eventCode], function (err, rows) {
+            if (err) {
+                console.log(err);
+                return next(err);
+            }
+
+            var event = {};
+            rows.forEach(function (result) {
+                console.log(result);
+                event.code = result.event_code;
+                event.optPassword = result.opt_password;
+                event.adminPassword = result.admin_password;
+                event.location = result.location;
+                event.startDate = result.start_date;
+                event.endDate = result.end_date;
+                event.description = result.description;
+            });
+
+            callback(event);
+        });
     },
     insertEvent: function (event) {
         var stringQuery = "INSERT INTO events (event_code, opt_password, admin_password, start_date, end_date, location, description) VALUES ?";

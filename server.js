@@ -43,7 +43,18 @@ app.get("/", function (req, res) {
             });
         } else console.log("SUCCESS - NO PASSWORD REQUIRED"); // NO PASSWORD
     });*/
+    //db.retrieveEvent();
+});
 
+app.get("/api/events/:eventcode", function (req, res) {
+
+    var eCode = req.params.eventcode;
+    db.retrieveEventByEventCode(eCode, function (event) {
+        if(!event.hasOwnProperty("code")) {
+            return res.status(404).end("Event with code " + eCode + "does not exist!");
+        }
+        return res.status(200).send(event);
+    });
 });
 
 app.post("/api/events/:eventcode/images", function (req, res) {
@@ -64,6 +75,8 @@ app.post("/api/events/:eventcode/images", function (req, res) {
             tempImages.push(image);
         });
 
+        // At the moment just one image is inserted into the database
+        // If performance issues occur, multiple images at a time may be processed
         db.insertImage(eventCode, tempImages[0], function(imageId) {
             res.location("/api/events/"+eventCode+"/images/"+imageId);
             return res.status(201).send("Successfully inserted image!");
@@ -116,7 +129,7 @@ app.get("/api/events/:eventcode/images/:imageid", function (req, res) {
         var imageId = req.params.imageid;
         db.doesEventCodeExist(eCode, function (eventCodeExists) {
             if(!eventCodeExists) {
-                return res.status(404).end("Event with code " + eCode + "does not exist!");
+                return res.status(404).end("Event with code " + eCode + " does not exist!");
             }
             db.retrieveImageById(eCode, imageId, function (image) {
                 if (!image.hasOwnProperty("path")) {
@@ -126,6 +139,18 @@ app.get("/api/events/:eventcode/images/:imageid", function (req, res) {
             });
         });
     });
+});
+
+app.delete("/api/events/:eventcode", function (req, res) {
+    var eCode = req.params.eventcode;
+    // if(checkAdmin(password)) {
+        db.deleteEventByEventCode(eCode, function(err) {
+            if(err) {
+                return res.status(500).end("");
+            }
+            return res.status(204).end("");
+        });
+    // }
 });
 
 app.listen(port, function () {
