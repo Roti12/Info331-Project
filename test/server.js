@@ -203,7 +203,7 @@ describe('Images', () => {
                 .post('/api/events/1000/images')
                 // .type('form')
                 // .send({'file': 'dog.jpg'})
-                .attach('file', fs.readFileSync('dog.jpg'), 'dog.jpg')
+                .attach('file', fs.readFileSync('test/dog.jpg'), 'dog.jpg')
                 .end((err, res) => {
                     res.should.have.status(201);
                     res.header.location.should.contain("/api/events/1000/images/");
