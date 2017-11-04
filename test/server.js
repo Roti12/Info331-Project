@@ -28,12 +28,12 @@ describe('Images', () => {
         it('it should GET all the images for the specified event', (done) => {
             var event = {
                 code: 1000,
-                optPassword: null,
-                adminPassword: null,
-                startDate: null,
-                endDate: null,
-                location: null,
-                description: null
+                optPassword: "123",
+                adminPassword: "admin123",
+                startDate: "2017-11-04",
+                endDate: "2017-11-05",
+                location: "norway",
+                description: "bla"
 
             };
             var image = {
@@ -55,12 +55,12 @@ describe('Images', () => {
         it('it should GET a 204 if the event has no images', (done) => {
             var event = {
                 code: 100,
-                optPassword: null,
-                adminPassword: null,
-                startDate: null,
-                endDate: null,
-                location: null,
-                description: null
+                optPassword: "123",
+                adminPassword: "admin123",
+                startDate: "2017-11-04",
+                endDate: "2017-11-05",
+                location: "norway",
+                description: "bla"
 
             };
             db.insertEvent(event);
@@ -90,12 +90,12 @@ describe('Images', () => {
         it('it should GET the image for the specified event and the specified id', (done) => {
             var event = {
                 code: 1000,
-                optPassword: null,
-                adminPassword: null,
-                startDate: null,
-                endDate: null,
-                location: null,
-                description: null
+                optPassword: "123",
+                adminPassword: "admin123",
+                startDate: "2017-11-04",
+                endDate: "2017-11-05",
+                location: "norway",
+                description: "bla"
 
             };
             var image = {
@@ -118,12 +118,12 @@ describe('Images', () => {
         it('it should GET a 404 if the image with the specified id does not exist', (done) => {
             var event = {
                 code: 1000,
-                optPassword: null,
-                adminPassword: null,
-                startDate: null,
-                endDate: null,
-                location: null,
-                description: null
+                optPassword: "123",
+                adminPassword: "admin123",
+                startDate: "2017-11-04",
+                endDate: "2017-11-05",
+                location: "norway",
+                description: "bla"
 
             };
             db.insertEvent(event);
@@ -156,12 +156,12 @@ describe('Images', () => {
         it('it should GET the event for the specified code', (done) => {
             var event = {
                 code: 1000,
-                optPassword: null,
-                adminPassword: null,
-                startDate: null,
-                endDate: null,
-                location: null,
-                description: null
+                optPassword: "123",
+                adminPassword: "admin123",
+                startDate: "2017-11-04",
+                endDate: "2017-11-05",
+                location: "norway",
+                description: "bla"
 
             };
             db.insertEvent(event);
@@ -171,7 +171,7 @@ describe('Images', () => {
                     res.should.have.status(200);
                     res.body.should.be.a('object');
                     res.body.should.have.property("code");
-                    res.body.code.should.contain(1000);
+                    res.body.code.should.equal(1000);
                     done();
                 });
         });
@@ -191,12 +191,13 @@ describe('Images', () => {
         it('it should POST an image and return status 201', (done) => {
             var event = {
                 code: 1000,
-                optPassword: null,
-                adminPassword: null,
-                startDate: null,
-                endDate: null,
-                location: null,
-                description: null
+                optPassword: "123",
+                adminPassword: "admin123",
+                startDate: "2017-11-04",
+                endDate: "2017-11-05",
+                location: "norway",
+                description: "bla"
+
             };
             db.insertEvent(event);
             chai.request(server)
@@ -218,12 +219,13 @@ describe('Images', () => {
         it('it should DELETE the event with the specified code'), (done) => {
             var event = {
                 code: 1000,
-                optPassword: null,
-                adminPassword: null,
-                startDate: null,
-                endDate: null,
-                location: null,
-                description: null
+                optPassword: "123",
+                adminPassword: "admin123",
+                startDate: "2017-11-04",
+                endDate: "2017-11-05",
+                location: "norway",
+                description: "bla"
+
             };
             db.insertEvent(event);
             chai.request(server)

@@ -21,9 +21,10 @@ const prodDb = {
     //thisisnotkahoot
 };
 
-var connection = mysql.createConnection(prodDb)
+var connection = mysql.createConnection(prodDb);
+// use prodDb temporarily for testing
 if (process.env.NODE_ENV === 'test') {
-    connection = mysql.createConnection(testDb);
+    connection = mysql.createConnection(prodDb);
 } else {
     connection = mysql.createConnection(prodDb);
 }
@@ -48,6 +49,15 @@ module.exports = {
             });
         });
 
+    },
+    deleteEventByEventCode: function (eventCode, callback) {
+        connection.query("DELETE FROM events WHERE event_code = ?", [eventCode], function (err, rows) {
+            if (err) {
+                console.log(err);
+                return next(err);
+            }
+            callback();
+        });
     },
     retrieveEvent : function(eventCode, callback) {
 
@@ -88,7 +98,7 @@ module.exports = {
                 console.log(result);
                 event.code = result.event_code;
                 event.optPassword = result.opt_password;
-                event.adminPassword = result.admin_password;
+                event.adminPassword = result.adm_password;
                 event.location = result.location;
                 event.startDate = result.start_date;
                 event.endDate = result.end_date;
@@ -99,8 +109,8 @@ module.exports = {
         });
     },
     insertEvent: function (event) {
-        var stringQuery = "INSERT INTO events (event_code, opt_password, admin_password, start_date, end_date, location, description) VALUES ?";
-        var values = [[event.code, event.optPassword, event.adminPassword, event.startDate, event.endDate, event.location, event.description]];
+        var stringQuery = "INSERT INTO events (event_code, opt_password, adm_password, start_date, end_date, location, description, email) VALUES ?";
+        var values = [[event.code, event.optPassword, event.adminPassword, event.startDate, event.endDate, event.location, event.description, "test@gmail.com"]];
 
         connection.query(stringQuery, [values], function (err, result) {
             if (err) throw err;
@@ -142,7 +152,7 @@ module.exports = {
         var imagePathArray = [];
         console.log(eventCode);
 
-        connection.query("SELECT * FROM images WHERE event_code = ? AND id = ?", [eventCode, imageId], function (err, rows) {
+        connection.query("SELECT * FROM images WHERE event_code = ? AND image_id = ?", [eventCode, imageId], function (err, rows) {
             console.log("retrieveImageById rows: " +rows);
             if (err) {
                 console.log(err);
