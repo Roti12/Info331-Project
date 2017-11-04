@@ -57,6 +57,17 @@ app.get("/api/events/:eventcode", function (req, res) {
     });
 });
 
+app.post("/api/events", function (req, res) {
+    console.log(req.body);
+    db.insertEvent(req.body.event, function(err) {
+       if (err) {
+           console.log(err);
+           return res.status(500).end("Something went wrong!");
+       }
+       return res.status(201).send("Successfully created event!");
+    });
+});
+
 app.post("/api/events/:eventcode/images", function (req, res) {
     upload(req, res, function (err) {
         if (err) {

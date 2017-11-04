@@ -108,7 +108,7 @@ module.exports = {
             callback(event);
         });
     },
-    insertEvent: function (event) {
+    insertEvent: function (event, callback) {
         var stringQuery = "INSERT INTO events (event_code, opt_password, adm_password, start_date, end_date, location, description, email) VALUES ?";
         var values = [[event.code, event.optPassword, event.adminPassword, event.startDate, event.endDate, event.location, event.description, "test@gmail.com"]];
 
@@ -116,6 +116,7 @@ module.exports = {
             if (err) throw err;
             console.log(result);
             console.log("Number of records inserted: " + result.affectedRows);
+            callback();
         });
     },
     insertImage: function (eventCode, image, callback) {

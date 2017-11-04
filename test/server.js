@@ -41,7 +41,7 @@ describe('Images', () => {
                 path: 'test/test.jpg',
                 size: '23423'
             };
-            db.insertEvent(event);
+            db.insertEvent(event, function() {});
             db.insertImage(1000, image, function(id){});
             chai.request(server)
                 .get('/api/events/1000/images')
@@ -63,14 +63,15 @@ describe('Images', () => {
                 description: "bla"
 
             };
-            db.insertEvent(event);
+            db.insertEvent(event, function() {
+                chai.request(server)
+                    .get('/api/events/100/images')
+                    .end((err, res) => {
+                        res.should.have.status(204);
+                        done();
+                    });
+            });
 
-            chai.request(server)
-                .get('/api/events/100/images')
-                .end((err, res) => {
-                    res.should.have.status(204);
-                    done();
-                });
         });
         it('it should GET a 404 if the eventcode does not exist', (done) => {
             chai.request(server)
@@ -103,7 +104,7 @@ describe('Images', () => {
                 path: 'test/test.jpg',
                 size: '23423'
             };
-            db.insertEvent(event);
+            db.insertEvent(event, function() {});
             db.insertImage(1000, image, function(id) {
                 chai.request(server)
                     .get('/api/events/1000/images/'+id)
@@ -126,7 +127,7 @@ describe('Images', () => {
                 description: "bla"
 
             };
-            db.insertEvent(event);
+            db.insertEvent(event, function() {});
             var imageId = 1;
 
             chai.request(server)
@@ -164,16 +165,17 @@ describe('Images', () => {
                 description: "bla"
 
             };
-            db.insertEvent(event);
-            chai.request(server)
-                .get('/api/events/1000')
-                .end((err, res) => {
-                    res.should.have.status(200);
-                    res.body.should.be.a('object');
-                    res.body.should.have.property("code");
-                    res.body.code.should.equal(1000);
-                    done();
-                });
+            db.insertEvent(event, function() {
+                chai.request(server)
+                    .get('/api/events/1000')
+                    .end((err, res) => {
+                        res.should.have.status(200);
+                        res.body.should.be.a('object');
+                        res.body.should.have.property("code");
+                        res.body.code.should.equal(1000);
+                        done();
+                    });
+            });
         });
         it('it should GET a 404 if the event with the specified code does not exist', (done) => {
             var eventCode = 1000;
@@ -186,8 +188,10 @@ describe('Images', () => {
                 });
         });
     });
-
-        describe('/POST image', () => {
+    /*
+ * Test the /POST route for /api/events
+ */
+    describe('/POST event', () => {
         it('it should POST an image and return status 201', (done) => {
             var event = {
                 code: 1000,
@@ -199,17 +203,43 @@ describe('Images', () => {
                 description: "bla"
 
             };
-            db.insertEvent(event);
             chai.request(server)
-                .post('/api/events/1000/images')
-                // .type('form')
-                // .send({'file': 'dog.jpg'})
-                .attach('file', fs.readFileSync('test/dog.jpg'), 'dog.jpg')
+                .post('/api/events')
+                .send({event: event})
                 .end((err, res) => {
                     res.should.have.status(201);
-                    res.header.location.should.contain("/api/events/1000/images/");
+                    //res.header.location.should.contain("/api/events/1000/images/");
                     done();
                 });
+        });
+    });
+    /*
+  * Test the /POST route for /api/events/:eventcode/images
+  */
+    describe('/POST image', () => {
+        it('it should POST an image and return status 201', (done) => {
+            var event = {
+                code: 1000,
+                optPassword: "123",
+                adminPassword: "admin123",
+                startDate: "2017-11-04",
+                endDate: "2017-11-05",
+                location: "norway",
+                description: "bla"
+
+            };
+            db.insertEvent(event, function() {
+                chai.request(server)
+                    .post('/api/events/1000/images')
+                    // .type('form')
+                    // .send({'file': 'dog.jpg'})
+                    .attach('file', fs.readFileSync('test/dog.jpg'), 'dog.jpg')
+                    .end((err, res) => {
+                        res.should.have.status(201);
+                        res.header.location.should.contain("/api/events/1000/images/");
+                        done();
+                    });
+            });
         });
     });
     /*
@@ -227,13 +257,14 @@ describe('Images', () => {
                 description: "bla"
 
             };
-            db.insertEvent(event);
-            chai.request(server)
-                .delete('/api/events/1000')
-                .end((err, res) => {
-                    res.should.have.status(204);
-                    done();
-                });
+            db.insertEvent(event, function() {
+                chai.request(server)
+                    .delete('/api/events/1000')
+                    .end((err, res) => {
+                        res.should.have.status(204);
+                        done();
+                    });
+            });
 
         }
     });
