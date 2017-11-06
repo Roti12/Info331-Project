@@ -1,4 +1,5 @@
 const mysql = require("mysql");
+var fs = require('fs');
 // const Image = require("../controllers/models/image");
 const testDb = {
     host: "localhost",
@@ -59,6 +60,24 @@ module.exports = {
             callback();
         });
     },
+    deleteImageById: function (imageId, callback) {
+        connection.query("SELECT image_path FROM images WHERE image_id = ?", [imageId], function(err, rows) {
+            if(err) return next(err);
+
+            rows.forEach(function(result) {
+                fs.unlink(result.image_path);
+            })
+        });
+
+        connection.query("DELETE FROM images WHERE image_id = ?", [imageId], function (err, rows) {
+            if (err) {
+                console.log(err);
+                return next(err);
+            }
+            console.log(rows);
+            callback();
+        });
+    },
     retrieveEvent : function(eventCode, callback) {
 
       var tempObject = [];
@@ -103,6 +122,7 @@ module.exports = {
                 event.startDate = result.start_date;
                 event.endDate = result.end_date;
                 event.description = result.description;
+                event.email = result.email;
             });
 
             callback(event);
@@ -110,7 +130,7 @@ module.exports = {
     },
     insertEvent: function (event, callback) {
         var stringQuery = "INSERT INTO events (event_code, opt_password, adm_password, start_date, end_date, location, description, email) VALUES ?";
-        var values = [[event.code, event.optPassword, event.adminPassword, event.startDate, event.endDate, event.location, event.description, "test@gmail.com"]];
+        var values = [[event.code, event.optPassword, event.adminPassword, event.startDate, event.endDate, event.location, event.description, event.email]];
 
         connection.query(stringQuery, [values], function (err, result) {
             if (err) throw err;

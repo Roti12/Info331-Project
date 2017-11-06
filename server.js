@@ -152,15 +152,28 @@ app.get("/api/events/:eventcode/images/:imageid", function (req, res) {
     });
 });
 
-app.delete("/api/events/:eventcode", function (req, res) {
+app.delete("/api/events/:eventcode/", function (req, res) {
     var eCode = req.params.eventcode;
     // if(checkAdmin(password)) {
         db.deleteEventByEventCode(eCode, function(err) {
             if(err) {
-                return res.status(500).end("");
+                return res.status(500).end("Something went wrong!");
             }
             return res.status(204).end("");
         });
+    // }
+});
+
+app.delete("/api/events/:eventcode/images/:imageid", function (req, res) {
+    var eCode = req.params.eventcode;
+    var imageId = req.params.imageid;
+    // if(checkAdmin(password)) {
+    db.deleteImageById(imageId, function(err) {
+        if(err) {
+            return res.status(500).end("Something went wrong!");
+        }
+        return res.status(204).end("");
+    });
     // }
 });
 
