@@ -20,7 +20,26 @@ describe('Images', () => {
            done();
         });
     });
-
+    after((done) => {
+        var event = {
+            code: 1000,
+            optPassword: "123",
+            adminPassword: "admin123",
+            startDate: "2017-11-04",
+            endDate: "2017-11-05",
+            location: "norway",
+            description: "bla",
+            email: "test@gmail.com"
+        };
+        db.insertEvent(event, function() {
+            chai.request(server)
+                .post('/api/events/1000/images')
+                .attach('file', fs.readFileSync('test/dog.jpg'), 'dog.jpg')
+                .end((err, res) => {
+                    done();
+                });
+        });
+    });
     /*
       * Test the /GET route for /api/events/:eventcode/images
       */
@@ -291,10 +310,8 @@ describe('Images', () => {
                 .post('/api/events/1000/images')
                 .attach('file', fs.readFileSync('test/dog.jpg'), 'dog.jpg')
                 .end((err, res) => {
-                    console.log("response:" + res.header.location);
                     var uri = res.header.location;
                     var imageId = uri.substring(uri.lastIndexOf("/") + 1);
-                    console.log("imageId: " + imageId);
                     chai.request(server)
                         .delete('/api/events/1000/images/' + imageId)
                         .end((err, res) => {
@@ -302,7 +319,6 @@ describe('Images', () => {
                             done();
                         });
                 });
-
         });
     });
 });

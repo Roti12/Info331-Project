@@ -1,6 +1,9 @@
 const express = require("express");
 const multer = require("multer");
 const bodyParser = require("body-parser");
+const expressJwt = require('express-jwt');
+const jwt = require('jsonwebtoken');
+const jwtDecode = require('jwt-decode');
 const app = express();
 
 const port = 3000;
@@ -11,6 +14,9 @@ app.use(bodyParser.urlencoded({
 }));
 app.use("/EventPhotos", express.static("EventPhotos"));
 app.use("/images", express.static("images"));
+
+
+app.use(expressJwt({secret: 'test123'}).unless({path: [/^\/api\/events\/.*\/login/, '/api/events'], custom: function(req) {return process.env.NODE_ENV === 'test'}}));
 
 const db = require('./routes/db.js');
 const auth = require('./routes/authentication.js');
@@ -31,6 +37,28 @@ const upload = multer({
     storage: storage
 }).array("file", 3);
 
+function processAuthentication (req, res, next) {
+    if(process.env.NODE_ENV === 'test') {
+        return next();
+    }
+    var decodedToken = jwtDecode(req.get('Authorization').substr(7));
+    var regex = /.*\/events\/(\d+).*/gi;
+    var eCode;
+    if (req.url.match(regex)) {
+        eCode = regex.exec(req.url)[1];
+    }
+    if (typeof eCode != 'undefined' && decodedToken.eventcode !== eCode) {
+        return res.status(401).end("Unauthorized for this event!");
+    }
+    if (req.method === 'DELETE' && !decodedToken.admin) {
+        return res.status(403).end("Admin privileges required!");
+    }
+
+    // keep executing the router middleware
+    next()
+}
+
+app.use(processAuthentication);
 
 app.get("/", function (req, res) {
     res.sendFile(__dirname + "/EventPhotos/index.html");
@@ -51,7 +79,7 @@ app.get("/api/events/:eventcode", function (req, res) {
     var eCode = req.params.eventcode;
     db.retrieveEventByEventCode(eCode, function (event) {
         if(!event.hasOwnProperty("code")) {
-            return res.status(404).end("Event with code " + eCode + "does not exist!");
+            return res.status(404).end("Event with code " + eCode + " does not exist!");
         }
         return res.status(200).send(event);
     });
@@ -65,6 +93,25 @@ app.post("/api/events", function (req, res) {
            return res.status(500).end("Something went wrong!");
        }
        return res.status(201).send("Successfully created event!");
+    });
+});
+
+app.post("/api/events/:eventcode/login", function (req, res) {
+    var eCode = req.params.eventcode;
+    db.retrieveEventByEventCode(eCode, function (event) {
+        if(!event.hasOwnProperty("code")) {
+            return res.status(404).end("Event with code " + eCode + " does not exist!");
+        }
+        if(auth.authenticate(req.body.password, event.optPassword, null)) {
+            var token = jwt.sign({"admin": false, "eventcode": eCode}, 'test123');
+            return res.status(200).send(token);
+        } else if (auth.authenticate(req.body.password, null, event.adminPassword)) {
+            var token = jwt.sign({"admin": true, "eventcode": eCode}, 'test123');
+            return res.status(200).send(token);
+        }
+        else {
+            return res.status(401).end("Invalid password");
+        }
     });
 });
 
@@ -154,27 +201,22 @@ app.get("/api/events/:eventcode/images/:imageid", function (req, res) {
 
 app.delete("/api/events/:eventcode/", function (req, res) {
     var eCode = req.params.eventcode;
-    // if(checkAdmin(password)) {
-        db.deleteEventByEventCode(eCode, function(err) {
-            if(err) {
-                return res.status(500).end("Something went wrong!");
-            }
-            return res.status(204).end("");
-        });
-    // }
+    db.deleteEventByEventCode(eCode, function(err) {
+        if(err) {
+            return res.status(500).end("Something went wrong!");
+        }
+        return res.status(204).end("");
+    });
 });
 
 app.delete("/api/events/:eventcode/images/:imageid", function (req, res) {
-    var eCode = req.params.eventcode;
     var imageId = req.params.imageid;
-    // if(checkAdmin(password)) {
     db.deleteImageById(imageId, function(err) {
         if(err) {
             return res.status(500).end("Something went wrong!");
         }
         return res.status(204).end("");
     });
-    // }
 });
 
 app.listen(port, function () {
