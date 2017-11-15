@@ -262,6 +262,41 @@ describe('Images', () => {
         });
     });
     /*
+* Test the /PUT route for /api/events/:eventcode
+*/
+    describe('/PUT /api/events/:eventcode', () => {
+        it('it should update an event and return status 201', (done) => {
+            var event = {
+                code: 1000,
+                optPassword: "123",
+                adminPassword: "admin123",
+                startDate: "2017-11-04",
+                endDate: "2017-11-05",
+                location: "norway",
+                description: "bla",
+                email: "test@gmail.com"
+            };
+            var updatedEvent = {
+                optPassword: "1234",
+                adminPassword: "admin1234",
+                startDate: "2017-11-04",
+                endDate: "2017-11-05",
+                location: "bergen",
+                description: "update test",
+                email: "test@gmail.com"
+            };
+            db.insertEvent(event, function() {
+                chai.request(server)
+                    .put('/api/events/1000')
+                    .send({event: updatedEvent})
+                    .end((err, res) => {
+                        res.should.have.status(201);
+                        done();
+                    });
+            });
+        });
+    });
+    /*
 * Test the /DELETE route for /api/events/:eventcode
 */
     describe('/DELETE /api/events/:eventcode', () => {

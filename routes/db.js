@@ -170,9 +170,6 @@ module.exports = {
     },
 
     retrieveImageById: function (eventCode,imageId, callback) {
-        var imagePathArray = [];
-        console.log(eventCode);
-
         connection.query("SELECT * FROM images WHERE event_code = ? AND image_id = ?", [eventCode, imageId], function (err, rows) {
             console.log("retrieveImageById rows: " +rows);
             if (err) {
@@ -188,6 +185,16 @@ module.exports = {
 
             callback(image);
         })
+    },
+
+    updateEvent: function (eventCode, event, callback) {
+        var stringQuery = "UPDATE events SET opt_password = ?, adm_password = ?, start_date = ?, end_date = ?, location = ?, description = ?, email = ? WHERE event_code = ?";
+        var values = [event.optPassword, event.adminPassword, event.startDate, event.endDate, event.location, event.description, event.email, eventCode];
+        connection.query(stringQuery, values, function (err, result) {
+            if (err) throw err;
+            console.log(result);
+            callback();
+        });
     },
 
     doesEventCodeExist: function (eventCode, callback) {

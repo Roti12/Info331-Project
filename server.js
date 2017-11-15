@@ -199,6 +199,22 @@ app.get("/api/events/:eventcode/images/:imageid", function (req, res) {
     });
 });
 
+app.put("/api/events/:eventcode", function (req, res) {
+    var eCode = req.params.eventcode;
+    db.doesEventCodeExist(eCode, function (eventCodeExists) {
+        if (!eventCodeExists) {
+            return res.status(404).end("Event with code " + eCode + " does not exist!");
+        }
+        db.updateEvent(eCode, req.body.event, function (err) {
+            if (err) {
+                console.log(err);
+                return res.status(500).end("Something went wrong!");
+            }
+            return res.status(201).send("Successfully updated event with code " + eCode + "!");
+        });
+    });
+});
+
 app.delete("/api/events/:eventcode/", function (req, res) {
     var eCode = req.params.eventcode;
     db.deleteEventByEventCode(eCode, function(err) {
