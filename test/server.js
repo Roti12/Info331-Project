@@ -61,16 +61,20 @@ describe('Images', () => {
                 path: 'test/test.jpg',
                 size: '23423'
             };
-            db.insertEvent(event, function() {});
-            db.insertImage(1000, image, function(id){});
-            chai.request(server)
-                .get('/api/events/1000/images')
-                .end((err, res) => {
-                    res.should.have.status(200);
-                    res.body.should.be.a('array');
-                    res.body.length.should.be.eql(1);
-                    done();
+            db.insertEvent(event, function(err) {
+                if(err) throw err;
+                db.insertImage(1000, image, function(err, id){
+                    if(err) throw err;
+                    chai.request(server)
+                        .get('/api/events/1000/images')
+                        .end((err, res) => {
+                            res.should.have.status(200);
+                            res.body.should.be.a('array');
+                            res.body.length.should.be.eql(1);
+                            done();
+                        });
                 });
+            });
         });
         it('it should GET a 204 if the event has no images', (done) => {
             var event = {
@@ -83,7 +87,8 @@ describe('Images', () => {
                 description: "bla",
                 email: "test@gmail.com"
             };
-            db.insertEvent(event, function() {
+            db.insertEvent(event, function(err) {
+                if(err) throw err;
                 chai.request(server)
                     .get('/api/events/100/images')
                     .end((err, res) => {
@@ -125,16 +130,19 @@ describe('Images', () => {
                 path: 'test/test.jpg',
                 size: '23423'
             };
-            db.insertEvent(event, function() {});
-            db.insertImage(1000, image, function(id) {
-                chai.request(server)
-                    .get('/api/events/1000/images/'+id)
-                    .end((err, res) => {
-                        res.should.have.status(200);
-                        res.body.should.be.a('object');
-                        res.body.should.have.property("path");
-                        done();
-                    });
+            db.insertEvent(event, function(err) {
+                if(err) throw err;
+                db.insertImage(1000, image, function(err, id) {
+                    if(err) throw err;
+                    chai.request(server)
+                        .get('/api/events/1000/images/'+id)
+                        .end((err, res) => {
+                            res.should.have.status(200);
+                            res.body.should.be.a('object');
+                            res.body.should.have.property("path");
+                            done();
+                        });
+                });
             });
         });
         it('it should GET a 404 if the image with the specified id does not exist', (done) => {
@@ -148,16 +156,18 @@ describe('Images', () => {
                 description: "bla",
                 email: "test@gmail.com"
             };
-            db.insertEvent(event, function() {});
-            var imageId = 1;
+            db.insertEvent(event, function(err) {
+                if(err) throw err;
+                var imageId = 1;
 
-            chai.request(server)
-                .get('/api/events/1000/images/' + imageId)
-                .end((err, res) => {
-                    res.should.have.status(404);
-                    res.text.should.contain(imageId);
-                    done();
-                });
+                chai.request(server)
+                    .get('/api/events/1000/images/' + imageId)
+                    .end((err, res) => {
+                        res.should.have.status(404);
+                        res.text.should.contain(imageId);
+                        done();
+                    });
+            });
         });
         it('it should GET a 404 if the event with the specified code does not exist', (done) => {
             var eventCode = 1000;
@@ -186,7 +196,8 @@ describe('Images', () => {
                 description: "bla",
                 email: "test@gmail.com"
             };
-            db.insertEvent(event, function() {
+            db.insertEvent(event, function(err) {
+                if(err) throw err;
                 chai.request(server)
                     .get('/api/events/1000')
                     .end((err, res) => {
@@ -212,8 +223,8 @@ describe('Images', () => {
     /*
  * Test the /POST route for /api/events
  */
-    describe('/POST event', () => {
-        it('it should POST an image and return status 201', (done) => {
+    describe('/POST /api/events', () => {
+        it('it should POST an event and return status 201', (done) => {
             var event = {
                 code: 1000,
                 optPassword: "123",
@@ -249,7 +260,8 @@ describe('Images', () => {
                 description: "bla",
                 email: "test@gmail.com"
             };
-            db.insertEvent(event, function() {
+            db.insertEvent(event, function(err) {
+                if(err) throw err;
                 chai.request(server)
                     .post('/api/events/1000/images')
                     .attach('file', fs.readFileSync('test/dog.jpg'), 'dog.jpg')
@@ -285,7 +297,8 @@ describe('Images', () => {
                 description: "update test",
                 email: "test@gmail.com"
             };
-            db.insertEvent(event, function() {
+            db.insertEvent(event, function(err) {
+                if(err) throw err;
                 chai.request(server)
                     .put('/api/events/1000')
                     .send({event: updatedEvent})
@@ -311,7 +324,8 @@ describe('Images', () => {
                 description: "bla",
                 email: "test@gmail.com"
             };
-            db.insertEvent(event, function() {
+            db.insertEvent(event, function(err) {
+                if(err) throw err;
                 chai.request(server)
                     .delete('/api/events/1000/')
                     .end((err, res) => {
