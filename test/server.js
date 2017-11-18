@@ -26,7 +26,7 @@ describe('Images', () => {
             optPassword: "123",
             adminPassword: "admin123",
             startDate: "2017-11-04",
-            endDate: "2017-11-05",
+            endDate: "2017-18-11",
             location: "norway",
             description: "bla",
             email: "test@gmail.com"
@@ -340,7 +340,7 @@ describe('Images', () => {
 * Test the /DELETE route for /api/events/:eventcode/images/:imageid
 */
     describe('/DELETE /api/events/:eventcode/images/:imageid', () => {
-        it('it should DELETE the event with the specified code', (done) => {
+        it('it should DELETE the image with the specified id', (done) => {
             var event = {
                 code: 1000,
                 optPassword: "123",
@@ -354,18 +354,20 @@ describe('Images', () => {
 
             chai.request(server)
                 .post('/api/events')
-                .send({event: event});
-            chai.request(server)
-                .post('/api/events/1000/images')
-                .attach('file', fs.readFileSync('test/dog.jpg'), 'dog.jpg')
+                .send({event: event})
                 .end((err, res) => {
-                    var uri = res.header.location;
-                    var imageId = uri.substring(uri.lastIndexOf("/") + 1);
                     chai.request(server)
-                        .delete('/api/events/1000/images/' + imageId)
+                        .post('/api/events/1000/images')
+                        .attach('file', fs.readFileSync('test/dog.jpg'), 'dog.jpg')
                         .end((err, res) => {
-                            res.should.have.status(204);
-                            done();
+                            var uri = res.header.location;
+                            var imageId = uri.substring(uri.lastIndexOf("/") + 1);
+                            chai.request(server)
+                                .delete('/api/events/1000/images/' + imageId)
+                                .end((err, res) => {
+                                    res.should.have.status(204);
+                                    done();
+                                });
                         });
                 });
         });

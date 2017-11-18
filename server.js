@@ -37,6 +37,33 @@ const upload = multer({
     storage: storage
 }).array("file", 3);
 
+/**
+ * viewingDelay - minutes after the end of the event until the images are visible
+ **/
+function determineEventStatus(startTime, endTime, viewingDelay) {
+    var currentTime = Date.now();
+    var status;
+    if (currentTime < startTime) status = "upcoming";
+    else if (currentTime >= startTime && currentTime <= endTime) status = "active";
+    else if (currentTime > endTime && currentTime < endTime + (viewingDelay*60000)) status = "over";
+    else status = "viewable";
+    return status;
+}
+
+function preErrorCheck(req, res, next) {
+    var regex = /.*\/events\/(\d+).*/gi;
+    if(req.url.match(regex)) {
+        var eCode = regex.exec(req.url)[1];
+        db.doesEventCodeExist(eCode, function(err, codeExists) {
+           if(err) return next(err);
+           if(!codeExists) return res.status(404).end("Event with code " + eCode + " does not exist!");
+           return next();
+        });
+    } else {
+        next();
+    }
+}
+
 function processAuthentication (req, res, next) {
     if(process.env.NODE_ENV === 'test') {
         return next();
@@ -53,11 +80,21 @@ function processAuthentication (req, res, next) {
     if (req.method === 'DELETE' && !decodedToken.admin) {
         return res.status(403).end("Admin privileges required!");
     }
+    if (req.method === 'GET' && req.url.match(/.*images.*/) && typeof eCode != 'undefined') {
+        db.retrieveImagesByEventCode(eCode, function(err, event) {
+            if(err) return next(err);
+            var eventStatus = determineEventStatus(event.startTime, event.endTime, 120);
+            if(eventStatus !== 'viewable' || (decodedToken.admin && eventStatus !== 'viewable' && eventStatus !== 'over')) {
+                return status(403).end("It is not yet possible to view the pictures!");
+            }
+        });
+    }
 
     // keep executing the router middleware
     next()
 }
 
+app.use(preErrorCheck);
 app.use(processAuthentication);
 
 app.get("/", function (req, res) {
@@ -79,9 +116,6 @@ app.get("/api/events/:eventcode", function (req, res) {
     var eCode = req.params.eventcode;
     db.retrieveEventByEventCode(eCode, function (err, event) {
         if(err) return next(err);
-        if(!event.hasOwnProperty("code")) {
-            return res.status(404).end("Event with code " + eCode + " does not exist!");
-        }
         return res.status(200).send(event);
     });
 });
@@ -92,16 +126,10 @@ app.get("/api/events/:eventcode/images", function (req, res, next) {
         if(err) return next(err);
 
         var eCode = req.params.eventcode;
-        db.doesEventCodeExist(eCode, function (err, eventCodeExists) {
+        db.retrieveImagesByEventCode(eCode, function (err, data) {
             if(err) return next(err);
-            if(!eventCodeExists) {
-                return res.status(404).send(imagePaths);
-            }
-            db.retrieveImagesByEventCode(eCode, function (err, data) {
-                if(err) return next(err);
-                prepareResponse(data);
-                return res.send(imagePaths);
-            });
+            prepareResponse(data);
+            return res.send(imagePaths);
         });
 
         function prepareResponse(data) {
@@ -123,18 +151,12 @@ app.get("/api/events/:eventcode/images/:imageid", function (req, res, next) {
 
         var eCode = req.params.eventcode;
         var imageId = req.params.imageid;
-        db.doesEventCodeExist(eCode, function (err, eventCodeExists) {
+        db.retrieveImageById(eCode, imageId, function (err, image) {
             if(err) return next(err);
-            if(!eventCodeExists) {
-                return res.status(404).end("Event with code " + eCode + " does not exist!");
+            if(!image.hasOwnProperty("path")) {
+                return res.status(404).end("Image with id " + imageId + " does not exist!");
             }
-            db.retrieveImageById(eCode, imageId, function (err, image) {
-                if(err) return next(err);
-                if(!image.hasOwnProperty("path")) {
-                    return res.status(404).end("Image with id " + imageId + " does not exist!");
-                }
-                return res.status(200).send(image);
-            });
+            return res.status(200).send(image);
         });
     });
 });
@@ -196,15 +218,9 @@ app.post("/api/events/:eventcode/login", function (req, res) {
 
 app.put("/api/events/:eventcode", function (req, res) {
     var eCode = req.params.eventcode;
-    db.doesEventCodeExist(eCode, function (err, eventCodeExists) {
+    db.updateEvent(eCode, req.body.event, function (err, result) {
         if(err) return next(err);
-        if (!eventCodeExists) {
-            return res.status(404).end("Event with code " + eCode + " does not exist!");
-        }
-        db.updateEvent(eCode, req.body.event, function (err, result) {
-            if(err) return next(err);
-            return res.status(201).send("Successfully updated event with code " + eCode + "!");
-        });
+        return res.status(201).send("Successfully updated event with code " + eCode + "!");
     });
 });
 
