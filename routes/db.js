@@ -107,17 +107,20 @@ module.exports = {
         });
     },
     retrieveImagesByEventCode: function (eventCode, callback) {
-        var imagePathArray = [];
+        var images = [];
         console.log(eventCode);
 
         connection.query("SELECT image_path FROM images WHERE event_code =?", [eventCode], function (err, rows) {
             if (err) return callback(err);
 
             rows.forEach(function (result) {
-                imagePathArray.push(result.image_path);
+                var image = {
+                    path: result.image_path
+                }
+                images.push(image);
             });
 
-            callback(err, imagePathArray);
+            callback(err, images);
         })
     },
     retrieveImageById: function (eventCode,imageId, callback) {
@@ -184,14 +187,6 @@ module.exports = {
         });
     },
     deleteImageById: function (imageId, callback) {
-        connection.query("SELECT image_path FROM images WHERE image_id = ?", [imageId], function(err, rows) {
-            if (err) return callback(err);
-
-            rows.forEach(function(result) {
-                fs.unlink(result.image_path);
-            })
-        });
-
         connection.query("DELETE FROM images WHERE image_id = ?", [imageId], function (err, rows) {
             if (err) return callback(err);
             console.log(rows);

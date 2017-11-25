@@ -1,9 +1,16 @@
 const express = require("express");
 const multer = require("multer");
 const bodyParser = require("body-parser");
+const moment = require("moment");
 const expressJwt = require('express-jwt');
 const jwt = require('jsonwebtoken');
 const jwtDecode = require('jwt-decode');
+const Vision = require('@google-cloud/vision');
+const admin = require("firebase-admin");
+const serviceAccount = require("./evntFirebase-adminSDK.json");
+
+const vision = new Vision();
+
 const app = express();
 
 const port = 3000;
@@ -16,10 +23,17 @@ app.use("/EventPhotos", express.static("EventPhotos"));
 app.use("/images", express.static("images"));
 
 
-app.use(expressJwt({secret: 'test123'}).unless({path: [/^\/api\/events\/.*\/login/, '/api/events'], custom: function(req) {return process.env.NODE_ENV === 'test'}}));
+app.use(expressJwt({secret: 'test123'}).unless({path: [/^\/api\/events\/.*\/login/, '/api/events', '/index'], custom: function(req) {return process.env.NODE_ENV === 'test'}}));
 
 const db = require('./routes/db.js');
 const auth = require('./routes/authentication.js');
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: "eventpictures"
+});
+
+var bucket = admin.storage().bucket();
 
 
 const storage = multer.diskStorage({
@@ -36,6 +50,30 @@ const storage = multer.diskStorage({
 const upload = multer({
     storage: storage
 }).array("file", 3);
+
+function labelImages() {
+    // The name of the image file to annotate
+    const fileName = './images/file_1511001432131_dog.jpg';
+
+    // Prepare the request object
+    const request = {
+        source: {
+            filename: fileName
+        }
+    };
+
+    // Performs label detection on the image file
+    vision.labelDetection(request)
+        .then((results) => {
+            const labels = results[0].labelAnnotations;
+
+            console.log('Labels:');
+            labels.forEach((label) => console.log(label.description));
+        })
+        .catch((err) => {
+            console.error('ERROR:', err);
+        });
+}
 
 /**
  * viewingDelay - minutes after the end of the event until the images are visible
@@ -65,7 +103,7 @@ function preErrorCheck(req, res, next) {
 }
 
 function processAuthentication (req, res, next) {
-    if(process.env.NODE_ENV === 'test') {
+    if(process.env.NODE_ENV === 'test' || typeof req.get('Authorization') == 'undefined') {
         return next();
     }
     var decodedToken = jwtDecode(req.get('Authorization').substr(7));
@@ -97,7 +135,7 @@ function processAuthentication (req, res, next) {
 app.use(preErrorCheck);
 app.use(processAuthentication);
 
-app.get("/", function (req, res) {
+app.get("/index", function (req, res) {
     res.sendFile(__dirname + "/EventPhotos/index.html");
     /*auth.checkForPassword(12345, function(bool) {
         if(bool) { // CHECKS IF THERE IS A PASSWORD
@@ -111,7 +149,7 @@ app.get("/", function (req, res) {
     //db.retrieveEvent();
 });
 
-app.get("/api/events/:eventcode", function (req, res) {
+app.get("/api/events/:eventcode", function (req, res, next) {
 
     var eCode = req.params.eventcode;
     db.retrieveEventByEventCode(eCode, function (err, event) {
@@ -121,41 +159,53 @@ app.get("/api/events/:eventcode", function (req, res) {
 });
 
 app.get("/api/events/:eventcode/images", function (req, res, next) {
-    var imagePaths = [];
-    upload(req, res, function (err) {
+    //labelImages();
+
+    var eCode = req.params.eventcode;
+    db.retrieveImagesByEventCode(eCode, function (err, images) {
         if(err) return next(err);
-
-        var eCode = req.params.eventcode;
-        db.retrieveImagesByEventCode(eCode, function (err, data) {
-            if(err) return next(err);
-            prepareResponse(data);
-            return res.send(imagePaths);
-        });
-
-        function prepareResponse(data) {
-            for(var i in data) {
-                imagePaths.push(data[i]);
-            }
-
-            if (imagePaths.length <= 0) {
-                res.status(204);
-            }
+        console.log(images);
+        if (images.length <= 0) return res.status(204).send("No images found for event with code " + eCode);
+        var modifiedImages = [];
+        var config = {
+            action: 'read',
+            expires: '03-17-2025'
+        };
+        var imageCounter = 0;
+        for(var i = 0; i < images.length; i++) {
+            console.log(images[i]);
+            console.log(images[i].path);
+            bucket.file(images[i].path).getSignedUrl(config, function(err, url) {
+                if (err) return next(err);
+                var modifiedImage = {
+                    path: url
+                };
+                modifiedImages.push(modifiedImage);
+                imageCounter++;
+                if (imageCounter >= images.length) return res.status(200).send(modifiedImages);
+            });
         }
-
+        return next(err);
     });
 });
 
 app.get("/api/events/:eventcode/images/:imageid", function (req, res, next) {
-    upload(req, res, function (err) {
-        if(err) return next(err);
 
-        var eCode = req.params.eventcode;
-        var imageId = req.params.imageid;
-        db.retrieveImageById(eCode, imageId, function (err, image) {
-            if(err) return next(err);
-            if(!image.hasOwnProperty("path")) {
-                return res.status(404).end("Image with id " + imageId + " does not exist!");
-            }
+    var eCode = req.params.eventcode;
+    var imageId = req.params.imageid;
+    db.retrieveImageById(eCode, imageId, function (err, image) {
+        if(err) return next(err);
+        if(!image.hasOwnProperty("path")) {
+            return res.status(404).end("Image with id " + imageId + " does not exist!");
+        }
+        var config = {
+            action: 'read',
+            expires: '03-17-2025'
+        };
+
+        bucket.file(image.path).getSignedUrl(config, function(err, url) {
+            if (err) return next(err);
+            image.path = url;
             return res.status(200).send(image);
         });
     });
@@ -171,29 +221,35 @@ app.post("/api/events", function (req, res) {
 });
 
 app.post("/api/events/:eventcode/images", function (req, res,next) {
-    upload(req, res, function (err) {
-        if(err) return next(err);
-        var eventCode = req.params.eventcode;
 
+    var eventCode = req.params.eventcode;
+    var filename = eventCode + "/" + moment().format("YYYY-MM-DD_HHmmss") + "_" + req.body.fileMetadata.name;
+    console.log(filename);
+    var file = bucket.file(filename);
+    file.getSignedUrl({
+        contentType: req.body.fileMetadata.type,
+        action: 'write',
+        expires: '03-17-2025'
+    }, function(err, url) {
+        if (err) return next(err);
         var tempImages = [];
-        req.files.forEach(function (element) {
-            var image = {
-                name: element.originalname,
-                path: element.path,
-                size: element.size
-            };
-            tempImages.push(image);
-        });
+        var image = {
+            name: req.body.fileMetadata.name,
+            path: filename,
+            size: req.body.fileMetadata.size
+        };
+        tempImages.push(image);
 
         // At the moment just one image is inserted into the database
         // If performance issues occur, multiple images at a time may be processed
         db.insertImage(eventCode, tempImages[0], function(err, imageId) {
             if(err) return next(err);
             res.location("/api/events/"+eventCode+"/images/"+imageId);
-            return res.status(201).send("Successfully inserted image!");
+            return res.status(201).send(url);
         });
-
     });
+
+
 });
 
 app.post("/api/events/:eventcode/login", function (req, res) {
@@ -228,15 +284,43 @@ app.delete("/api/events/:eventcode/", function (req, res) {
     var eCode = req.params.eventcode;
     db.deleteEventByEventCode(eCode, function(err) {
         if(err) return next(err);
-        return res.status(204).end("");
+        console.log("event deleted from database");
+        bucket.getFiles({prefix: eCode}, function(err, files) {
+            console.log("found files:");
+            console.log(files);
+            if(files.length <= 0)
+                return res.status(204).send("Successfully deleted event with code " + eCode + "!");
+            var fileCounter = 0;
+           for (var i = 0; i < files.length; i++) {
+              files[i].delete(function (err, apiResponse) {
+                  if(err) return next(err);
+                  console.log("file deleted from storage");
+                  fileCounter++;
+                  if(fileCounter >= files.length)
+                      return res.status(204).send("Successfully deleted event with code " + eCode + "!");
+              });
+           }
+        });
     });
 });
 
 app.delete("/api/events/:eventcode/images/:imageid", function (req, res, next) {
     var imageId = req.params.imageid;
-    db.deleteImageById(imageId, function(err, result) {
+    var eCode = req.params.eventcode;
+    db.retrieveImageById(eCode, imageId, function (err, image) {
         if(err) return next(err);
-        return res.status(204).end("");
+        if(Object.keys(image).length === 0 && image.constructor === Object) return res.status(404).send("Image with id " + imageId + " does not exist!");
+        db.deleteImageById(imageId, function(err, result) {
+            if(err) return next(err);
+            bucket.getFiles({prefix: image.path}, function(err, files) {
+                if(files.length <= 0) return res.status(204).send("Successfully deleted image with id " + imageId + "!");
+                if(files.length > 1) return next(new Error("Could not find image with id " + imageId + "."));
+                files[0].delete(function (err, apiResponse) {
+                    if(err) return next(err);
+                    return res.status(204).send("Successfully deleted image with id " + imageId + "!");
+                });
+            });
+        });
     });
 });
 

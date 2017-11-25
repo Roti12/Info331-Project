@@ -32,12 +32,7 @@ describe('Images', () => {
             email: "test@gmail.com"
         };
         db.insertEvent(event, function() {
-            chai.request(server)
-                .post('/api/events/1000/images')
-                .attach('file', fs.readFileSync('test/dog.jpg'), 'dog.jpg')
-                .end((err, res) => {
-                    done();
-                });
+            done();
         });
     });
     /*
@@ -260,11 +255,17 @@ describe('Images', () => {
                 description: "bla",
                 email: "test@gmail.com"
             };
+            var fileMetadata = {
+                name: "test.jpg",
+                type: "image/jpeg",
+                size: "5200"
+            };
             db.insertEvent(event, function(err) {
                 if(err) throw err;
                 chai.request(server)
                     .post('/api/events/1000/images')
-                    .attach('file', fs.readFileSync('test/dog.jpg'), 'dog.jpg')
+                    //.attach('file', fs.readFileSync('test/dog.jpg'), 'dog.jpg')
+                    .send({fileMetadata: fileMetadata})
                     .end((err, res) => {
                         res.should.have.status(201);
                         res.header.location.should.contain("/api/events/1000/images/");
@@ -351,6 +352,11 @@ describe('Images', () => {
                 description: "bla",
                 email: "test@gmail.com"
             };
+            var fileMetadata = {
+                name: "test.jpg",
+                type: "image/jpeg",
+                size: "5200"
+            };
 
             chai.request(server)
                 .post('/api/events')
@@ -358,7 +364,8 @@ describe('Images', () => {
                 .end((err, res) => {
                     chai.request(server)
                         .post('/api/events/1000/images')
-                        .attach('file', fs.readFileSync('test/dog.jpg'), 'dog.jpg')
+                        // .attach('file', fs.readFileSync('test/dog.jpg'), 'dog.jpg')
+                        .send({fileMetadata: fileMetadata})
                         .end((err, res) => {
                             var uri = res.header.location;
                             var imageId = uri.substring(uri.lastIndexOf("/") + 1);
