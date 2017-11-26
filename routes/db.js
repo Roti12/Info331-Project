@@ -1,6 +1,10 @@
 const mysql = require("mysql");
 var fs = require('fs');
 // const Image = require("../controllers/models/image");
+
+/*
+* Database access information
+*/
 const testDb = {
     host: "localhost",
     user: "root",
@@ -10,6 +14,7 @@ const testDb = {
 };
 
 //CREATE A POOL INSTEAD?
+//Database connection
 const prodDb = {
     host: "sql11.freemysqlhosting.net",
     user: "sql11198291",
@@ -22,14 +27,19 @@ const prodDb = {
     //thisisnotkahoot
 };
 
+/*
+* Sets the connection to the live database.
+*/
 var connection = mysql.createConnection(prodDb);
-// use prodDb temporarily for testing
-if (process.env.NODE_ENV === 'test') {
+if (process.env.NODE_ENV === 'test') { 
     connection = mysql.createConnection(prodDb);
 } else {
     connection = mysql.createConnection(prodDb);
 }
 
+/*
+* Checks to see if the event code exists in the DB
+*/
 var doesEventCodeExist = function(eventCode, callback) {
     connection.query("SELECT count(event_code) AS event_exists from events WHERE event_code = ?", [eventCode], function (err, rows) {
         if (err) return callback(err);
@@ -37,6 +47,9 @@ var doesEventCodeExist = function(eventCode, callback) {
     });
 };
 
+/*
+* Inserts an event into the DB.
+*/
 var insertEvent = function(eCode, event, callback) {
     var stringQuery = "INSERT INTO events (event_code, opt_password, adm_password, start_date, end_date, location, description, email) VALUES ?";
     var values = [[eCode, event.optPassword, event.adminPassword, event.startDate, event.endDate, event.location, event.description, event.email]];
@@ -86,6 +99,11 @@ module.exports = {
             callback(err, Math.floor(Math.random() * numbers.length));
         });
     },
+    
+    /*
+    * Retrieves information about an event by using the event code. 
+    * Stores the information in an event object.
+    */
     retrieveEventByEventCode: function (eventCode, callback) {
         connection.query("SELECT * FROM events WHERE event_code = ? ", [eventCode], function (err, rows) {
             if (err) return callback(err);
@@ -106,6 +124,11 @@ module.exports = {
             callback(err, event);
         });
     },
+    
+    /*
+    * Retrieves images from DB with an event code.
+    * Stores the image path to be used to retrieve actual image.
+    */
     retrieveImagesByEventCode: function (eventCode, callback) {
         var images = [];
         console.log(eventCode);
@@ -123,6 +146,11 @@ module.exports = {
             callback(err, images);
         })
     },
+    
+    /*
+    * Retrieves images from DB with an image ID.
+    * Stores the image path to be used to retrieve actual image.
+    */
     retrieveImageById: function (eventCode,imageId, callback) {
         connection.query("SELECT * FROM images WHERE event_code = ? AND image_id = ?", [eventCode, imageId], function (err, rows) {
             console.log("retrieveImageById rows: " +rows);
@@ -137,6 +165,11 @@ module.exports = {
             callback(err, image);
         })
     },
+    
+    /*
+    * Generates and event code and checks if it doesn't exist
+    * inserts event with newly generated code
+    */
     insertEvent: function (event, callback) {
         this.generateEventCode(function(err, eventCode) {
             if(err) return callback(err);
@@ -160,6 +193,11 @@ module.exports = {
 
         });
     },
+    
+    
+    /*
+    * Inserts new data into image table
+    */
     insertImage: function (eventCode, image, callback) {
         var stringQuery = "INSERT INTO images (image_name, image_path, size, upl_date, event_code) VALUES ?";
         var values = [[image.name, image.path, image.size, new Date().toLocaleString(), eventCode]];
@@ -171,6 +209,9 @@ module.exports = {
             callback(err, result.insertId);
         });
     },
+    /*
+    * Updates and existing event.
+    */
     updateEvent: function (eventCode, event, callback) {
         var stringQuery = "UPDATE events SET opt_password = ?, adm_password = ?, start_date = ?, end_date = ?, location = ?, description = ?, email = ? WHERE event_code = ?";
         var values = [event.optPassword, event.adminPassword, event.startDate, event.endDate, event.location, event.description, event.email, eventCode];
@@ -180,12 +221,20 @@ module.exports = {
             callback(err, result);
         });
     },
+    
+    /*
+    * Deletes an event by its code
+    */
     deleteEventByEventCode: function (eventCode, callback) {
         connection.query("DELETE FROM events WHERE event_code = ?", [eventCode], function (err, rows) {
             if (err) return callback(err);
             callback(err, rows);
         });
     },
+    
+    /*
+    * Deletes an image by its ID
+    */
     deleteImageById: function (imageId, callback) {
         connection.query("DELETE FROM images WHERE image_id = ?", [imageId], function (err, rows) {
             if (err) return callback(err);
