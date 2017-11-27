@@ -1,4 +1,5 @@
 const express = require("express");
+const async = require("async");
 const multer = require("multer");
 const bodyParser = require("body-parser");
 const moment = require("moment");
@@ -13,7 +14,7 @@ const vision = new Vision();
 
 const app = express();
 
-const port = 3000;
+const port = 8080;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -51,29 +52,6 @@ const upload = multer({
     storage: storage
 }).array("file", 3);
 
-function labelImages() {
-    // The name of the image file to annotate
-    const fileName = './images/file_1511001432131_dog.jpg';
-
-    // Prepare the request object
-    const request = {
-        source: {
-            filename: fileName
-        }
-    };
-
-    // Performs label detection on the image file
-    vision.labelDetection(request)
-        .then((results) => {
-            const labels = results[0].labelAnnotations;
-
-            console.log('Labels:');
-            labels.forEach((label) => console.log(label.description));
-        })
-        .catch((err) => {
-            console.error('ERROR:', err);
-        });
-}
 
 /**
  * viewingDelay - minutes after the end of the event until the images are visible
@@ -159,33 +137,49 @@ app.get("/api/events/:eventcode", function (req, res, next) {
 });
 
 app.get("/api/events/:eventcode/images", function (req, res, next) {
-    //labelImages();
-
     var eCode = req.params.eventcode;
     db.retrieveImagesByEventCode(eCode, function (err, images) {
         if(err) return next(err);
+        var modifiedImages = images;
         console.log(images);
         if (images.length <= 0) return res.status(204).send("No images found for event with code " + eCode);
-        var modifiedImages = [];
         var config = {
             action: 'read',
             expires: '03-17-2025'
         };
-        var imageCounter = 0;
-        for(var i = 0; i < images.length; i++) {
-            console.log(images[i]);
-            console.log(images[i].path);
-            bucket.file(images[i].path).getSignedUrl(config, function(err, url) {
-                if (err) return next(err);
-                var modifiedImage = {
-                    path: url
-                };
-                modifiedImages.push(modifiedImage);
-                imageCounter++;
-                if (imageCounter >= images.length) return res.status(200).send(modifiedImages);
+        var labelImage = function(image, index, callback) {
+            const gcsPath = 'gs://eventpictures/' + image.path;
+            console.log(gcsPath);
+            // Performs safe search property detection on the remote file
+            vision.safeSearchDetection({ source: { imageUri: gcsPath } }, function (err, result) {
+                if(err) return callback(err);
+                console.log(result);
+                const detections = result.safeSearchAnnotation;
+
+                console.log(`Adult: ${detections.adult}`);
+                console.log(`Spoof: ${detections.spoof}`);
+                console.log(`Medical: ${detections.medical}`);
+                console.log(`Violence: ${detections.violence}`);
+                modifiedImages[index].safeSearch = detections;
+                callback();
             });
         }
-        return next(err);
+        var getUrl = function(image, index, callback) {
+            bucket.file(image.path).getSignedUrl(config, function(err, url) {
+                if (err) return callback(err);
+                modifiedImages[index].path = url;
+                callback();
+
+            });
+        }
+        async.eachOf(
+            images,
+            async.applyEach([getUrl, labelImage]),
+            function(err) {
+                if(err) return next(err);
+                return res.status(200).send(modifiedImages);
+            }
+        );
     });
 });
 
@@ -216,7 +210,11 @@ app.post("/api/events", function (req, res) {
     db.insertEvent(req.body.event, function(err, eventCode) {
         if(err) return next(err);
         res.location("/api/events/"+eventCode);
-        return res.status(201).send("Successfully created event!");
+        var result = {
+            text: "Successfully created event!",
+            eventCode: eventCode
+        };
+        return res.status(201).send(result);
     });
 });
 

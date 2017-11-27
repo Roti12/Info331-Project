@@ -4,7 +4,8 @@
   "description": "testing node with sql db",
   "main": "server.js",
   "scripts": {
-    "start": "SET NODE_ENV=dev && node server.js",
+    "deploy": "gcloud app deploy",
+    "start": "node server.js",
     "test": "mocha --timeout 10000"
   },
   "author": "",
@@ -12,6 +13,7 @@
   "dependencies": {
     "@google-cloud/storage": "^1.4.0",
     "@google-cloud/vision": "^0.12.0",
+    "async": "^2.6.0",
     "body-parser": "^1.18.2",
     "config": "^1.26.2",
     "express": "^4.15.4",
