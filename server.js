@@ -7,6 +7,7 @@ const express = require("express"); // framework
 const multer = require("multer"); // middleware for uploading
 const bodyParser = require("body-parser"); // middleware for parsing
 const moment = require("moment");
+const cors = require("cors");
 const expressJwt = require('express-jwt');
 const jwt = require('jsonwebtoken'); 
 const jwtDecode = require('jwt-decode');
@@ -20,6 +21,7 @@ const app = express();
 
 const port = 8080;
 
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
@@ -75,6 +77,13 @@ function determineEventStatus(startTime, endTime, viewingDelay) {
     return status;
 }
 
+function setCorsConfig(req, res, next) {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "*");
+    res.setHeader("Access-Control-Allow-Headers", "X-Requested-With, content-type, Authorization");
+    res.setHeader("Access-Control-Allow-Credentials", true);
+}
+
 function preErrorCheck(req, res, next) {
     var regex = /.*\/events\/(\d+).*/gi;
     if(req.url.match(regex)) {
@@ -119,6 +128,7 @@ function processAuthentication (req, res, next) {
     next()
 }
 
+app.use(setCorsConfig);
 app.use(preErrorCheck);
 app.use(processAuthentication);
 
