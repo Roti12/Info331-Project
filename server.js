@@ -3,8 +3,12 @@ const async = require("async");
 const multer = require("multer");
 const bodyParser = require("body-parser");
 const moment = require("moment");
+const express = require("express"); // framework
+const multer = require("multer"); // middleware for uploading
+const bodyParser = require("body-parser"); // middleware for parsing
+const moment = require("moment");
 const expressJwt = require('express-jwt');
-const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken'); 
 const jwtDecode = require('jwt-decode');
 const Vision = require('@google-cloud/vision');
 const admin = require("firebase-admin");
@@ -36,7 +40,9 @@ admin.initializeApp({
 
 var bucket = admin.storage().bucket();
 
-
+/*
+* Middleware for storing images/uploaded files in designated folder.
+*/
 const storage = multer.diskStorage({
     destination: function (req, file, callback) {
         callback(null, "./images");
@@ -47,7 +53,10 @@ const storage = multer.diskStorage({
     }
 });
 
-
+/*
+* Middleware used for uploading files, images in  this case.
+* Max for upload is an array of size 3.
+*/
 const upload = multer({
     storage: storage
 }).array("file", 3);
@@ -127,6 +136,9 @@ app.get("/index", function (req, res) {
     //db.retrieveEvent();
 });
 
+/*
+* Get request for retrieving all events by their event codes.
+*/
 app.get("/api/events/:eventcode", function (req, res, next) {
 
     var eCode = req.params.eventcode;
@@ -136,6 +148,9 @@ app.get("/api/events/:eventcode", function (req, res, next) {
     });
 });
 
+/*
+* Get request for retrieving images.
+*/
 app.get("/api/events/:eventcode/images", function (req, res, next) {
     var eCode = req.params.eventcode;
     db.retrieveImagesByEventCode(eCode, function (err, images) {
@@ -205,6 +220,9 @@ app.get("/api/events/:eventcode/images/:imageid", function (req, res, next) {
     });
 });
 
+/*
+* Post request for inserting event created on front end.
+*/
 app.post("/api/events", function (req, res) {
     console.log(req.body);
     db.insertEvent(req.body.event, function(err, eventCode) {
@@ -218,6 +236,10 @@ app.post("/api/events", function (req, res) {
     });
 });
 
+/*
+* Post request for inserting uploaded image info into DB
+* and image itself
+*/
 app.post("/api/events/:eventcode/images", function (req, res,next) {
 
     var eventCode = req.params.eventcode;
@@ -270,6 +292,9 @@ app.post("/api/events/:eventcode/login", function (req, res) {
     });
 });
 
+/*
+* Updates an event. 
+*/
 app.put("/api/events/:eventcode", function (req, res) {
     var eCode = req.params.eventcode;
     db.updateEvent(eCode, req.body.event, function (err, result) {
@@ -278,6 +303,9 @@ app.put("/api/events/:eventcode", function (req, res) {
     });
 });
 
+/*
+* Deletes an event
+*/
 app.delete("/api/events/:eventcode/", function (req, res) {
     var eCode = req.params.eventcode;
     db.deleteEventByEventCode(eCode, function(err) {
@@ -302,6 +330,9 @@ app.delete("/api/events/:eventcode/", function (req, res) {
     });
 });
 
+/*
+* Deletes an image by its ID.
+*/
 app.delete("/api/events/:eventcode/images/:imageid", function (req, res, next) {
     var imageId = req.params.imageid;
     var eCode = req.params.eventcode;
@@ -322,10 +353,16 @@ app.delete("/api/events/:eventcode/images/:imageid", function (req, res, next) {
     });
 });
 
+/*
+* Where the server is running. Listening to port 3000
+*/
 app.listen(port, function () {
     console.log("Server running on port: " + port + "..");
 });
 
+/*
+* Error handling.
+*/
 app.use(function (err, req, res, next) {
     console.error(err.stack);
     res.status(500).send('Something went wrong!');
