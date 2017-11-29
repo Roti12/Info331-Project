@@ -1,0 +1,16 @@
+<div id="frontpageContainer" class="container">
+  <div class="row">
+    <div class="col-md-4 col-md-offset-4">
+      <form action="api/events/1000/images/" method="get" enctype="multipart/form-data">
+        <input #eventPinInput type="number" id="eventpinInput" placeholder="Event Pin">
+        <input #passwordInput type="password" id="passwordInput" placeholder="Password">
+        <button type="button" class="btn" id="joinBtn" (click)="joinEvent(eventPinInput.value, passwordInput.value, ngWrong)">Join</button>
+      </form>
+
+      <div id="wrongPin" #ngWrong>
+        <p>{{ errorMessage }}</p>
+      </div>
+    </div>
+
+  </div>
+</div>

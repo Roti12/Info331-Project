@@ -1,0 +1,35 @@
+.container {
+  margin-top: 15px;
+}
+
+.downloadBtnInstance {
+  margin-top: 10px;
+}
+
+.ghost-button {
+  color: #1ea176;
+  background: 'transparent';
+  border: 1px solid #1ea176;
+  font-size: 16px;
+  padding: 7px 12px;
+  font-weight: normal;
+  margin: 6px 0;
+  margin-right: 12px;
+  display: inline-block;
+  text-decoration: none;
+  min-width: 120px;
+}
+
+.ghost-button:hover {
+  border-color: #444444;
+  color: #444444;
+}
+
+.col-xs-12{
+  text-align: center;
+}
+
+.btnWrap{
+  display:flex;
+  flex-direction:column;
+}

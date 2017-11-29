@@ -1,0 +1,58 @@
+#bs-hamburger{
+  margin-top: 13px;
+}
+
+#bs-dropdown{
+  text-align: center;
+}
+
+.navbar-inverse{
+  background-color:#1ea176;
+  border:0;
+}
+
+.navbar-inverse .navbar-nav>li>a{
+  color:white;
+}
+
+.navbar-inverse .navbar-brand{
+  color:white;
+  padding-top:19px;
+}
+
+.collapse, .navbar-collapse{
+  padding-top:5px;
+}
+
+.navbar-inverse .navbar-nav>li>a:hover{
+  color:yellow;
+}
+
+.glyphicon-camera:hover{
+  color:yellow;
+}
+
+.ghost-button {
+ background: 'transparent';
+ border: 1px solid white;
+ font-size: 16px;
+ padding: 7px 12px;
+ font-weight: normal;
+ margin: 6px 0;
+ margin-right: 12px;
+ display: inline-block;
+ text-decoration: none;
+ min-width: 120px;
+}
+
+.ghost-button:hover  {
+ border-color:yellow;
+}
+
+.ghost-button:active{
+  border-color: darken(yellow, 40%);
+}
+
+.navbar{
+  min-height: 60px;
+}

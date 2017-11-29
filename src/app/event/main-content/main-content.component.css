@@ -1,0 +1,23 @@
+.container h1{
+  margin-bottom: 20px;
+  color:#1ea176;
+}
+
+.container{
+  margin-bottom: 40px;
+}
+
+.checkmark{
+  width:20px;
+  height:20px;
+  position: absolute;
+  top: 10px;
+  right: 35px;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+
+.img-fluid{
+  margin-bottom: 5px;
+}
