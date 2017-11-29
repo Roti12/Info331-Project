@@ -51,8 +51,8 @@ var doesEventCodeExist = function(eventCode, callback) {
 * Inserts an event into the DB.
 */
 var insertEvent = function(eCode, event, callback) {
-    var stringQuery = "INSERT INTO events (event_code, opt_password, adm_password, start_date, end_date, location, description, email) VALUES ?";
-    var values = [[eCode, event.optPassword, event.adminPassword, event.startDate, event.endDate, event.location, event.description, event.email]];
+    var stringQuery = "INSERT INTO events (event_code, opt_password, adm_password, start_date, end_date, location, description, email, event_name) VALUES ?";
+    var values = [[eCode, event.optPassword, event.adminPassword, event.startDate, event.endDate, event.location, event.description, event.email, event.name]];
 
     connection.query(stringQuery, [values], function (err, result) {
         if(err) return callback(err);

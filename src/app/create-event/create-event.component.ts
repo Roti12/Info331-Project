@@ -55,7 +55,8 @@ export class CreateEventComponent implements OnInit {
       endDate:this.endDate,
       location:this.location,
       description:this.desc,
-      email:this.email
+      email:this.email,
+      name:this.eventName
     }
 
     console.log(event);
