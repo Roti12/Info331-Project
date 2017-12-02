@@ -2,12 +2,12 @@ h1{
   color:#1ea176;
 }
 
-#knapp{
+#btn{
 color: #fff;
 background-color: #1ea176;
 border-color: #fff;
 }
-#knapp:hover{
+#btn:hover{
 color: yellow;
 background-color: #1ea176;
 border-color: yellow;
