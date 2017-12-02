@@ -107,16 +107,6 @@ app.use(processAuthentication);
 
 app.get("/index", function (req, res) {
     res.sendFile(__dirname + "/EventPhotos/index.html");
-    /*auth.checkForPassword(12345, function(bool) {
-        if(bool) { // CHECKS IF THERE IS A PASSWORD
-            console.log("PASSWORD REQUIRED");
-            auth.checkIfCorrectlyEntered(12345, "hello", function(boolOne) {
-                if(boolOne) console.log("Success"); // TRUE IF PASSWORD SUCCESSFULLY ENTERED - EITHER NORMAL PW OR ADMIN PW
-                else console.log("Wrong password"); // FALSE IF INCORRECTLY ENTERED
-            });
-        } else console.log("SUCCESS - NO PASSWORD REQUIRED"); // NO PASSWORD
-    });*/
-    //db.retrieveEvent();
 });
 
 /*
