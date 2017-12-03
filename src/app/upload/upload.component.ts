@@ -9,12 +9,15 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class UploadComponent implements OnInit {
 
-
+  private startDate:Date;
+  private eventName: string;
 
   constructor(private http:HttpClient, private route: ActivatedRoute) { }
 
   ngOnInit() {
-
+    const event = JSON.parse(localStorage.getItem('event'));
+    this.startDate = event.startDate;
+    this.eventName = event.name;
   }
 
   uploadPictures(image:any){

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from '@angular/router'
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-main-content',
@@ -11,7 +12,8 @@ export class MainContentComponent implements OnInit {
 
   private results: string[] = [];
   private eventCode:number;
-  private startDate:string;
+  private startDate:Date;
+  private eventName: string;
   private getUrl:string = "http://localhost:3000/api/events/" + 1000 + "/images";
   //private defaultPath:string = "~/git/Info331-Project/";
 
@@ -21,6 +23,7 @@ export class MainContentComponent implements OnInit {
     this.eventCode = +this.route.snapshot.paramMap.get('eventPin');
     const event = JSON.parse(localStorage.getItem('event'));
     this.startDate = event.startDate;
+    this.eventName = event.name;
     // Make the HTTP request:
     // this.http.get('http://localhost:3000/api/events/1000/images',
     const jwt = localStorage.getItem('jwt');
@@ -33,7 +36,7 @@ export class MainContentComponent implements OnInit {
       for(var image in data){
         console.log(data[image].safeSearch);
         if(!(data[image].safeSearch.adult.includes("VERY_LIKELY") || data[image].safeSearch.violence.includes("VERY_LIKELY"))){
-          this.results.push(data[image].path)
+          this.results.push(data[image].path);
           console.log(data[image].path);
         }
       }

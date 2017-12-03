@@ -119,12 +119,13 @@ module.exports = {
                 event.endDate = result.end_date;
                 event.description = result.description;
                 event.email = result.email;
+                event.name = result.event_name;
             });
 
             callback(err, event);
         });
     },
-    
+
     /*
     * Retrieves images from DB with an event code.
     * Stores the image path to be used to retrieve actual image.

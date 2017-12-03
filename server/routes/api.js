@@ -215,7 +215,7 @@ app.get("/events/:eventcode/images/:imageid", function (req, res, next) {
 /*
 * Post request for inserting event created on front end.
 */
-app.post("/events", function (req, res) {
+app.post("/events", function (req, res, next) {
     console.log(req.body);
     db.insertEvent(req.body.event, function(err, eventCode) {
         if(err) return next(err);
