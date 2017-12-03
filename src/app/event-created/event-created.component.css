@@ -5,3 +5,14 @@
 div h1,h2,h3{
     color:#1ea176;
 }
+
+#btn{
+color: #fff;
+background-color: #1ea176;
+border-color: #fff;
+}
+#btn:hover{
+color: yellow;
+background-color: #1ea176;
+border-color: yellow;
+}

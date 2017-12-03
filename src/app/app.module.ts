@@ -30,7 +30,7 @@ const routes:Routes = [
   { path: 'eventCreated/:eventPin', component:EventCreatedComponent},
   { path: 'upload/:eventPin', component:UploadComponent },
   { path: 'upload', component:UploadComponent },
-  { path:'**', component:PageNotFoundComponent }
+  { path: '**', component:PageNotFoundComponent }
 ];
 
 @NgModule({
