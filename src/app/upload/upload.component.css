@@ -1,1 +1,25 @@
+h1,p {
+    color: #1ea176;
+}
 
+#content{
+  text-align: -webkit-center;
+}
+#btn {
+  color: #1ea176;
+  border-color: #1ea176;
+}
+
+#btn:hover {
+  color: yellow;
+  background-color: #1ea176;
+  border-color: yellow;
+}
+
+input[type=file]  {
+  padding:5px;
+  border:2px solid #ccc;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  border-color:#333;
+}
