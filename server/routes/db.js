@@ -27,15 +27,23 @@ const prodDb = {
     //thisisnotkahoot
 };
 
+const gcloudDb = {
+  host: "localhost",
+  user: "root",
+  password: "evntSqlAdmin",
+  database: "evnt",
+  port: 3307
+}
+
 /*
 * Sets the connection to the live database.
 */
-var connection = mysql.createConnection(prodDb);
-if (process.env.NODE_ENV === 'test') { 
-    connection = mysql.createConnection(prodDb);
-} else {
-    connection = mysql.createConnection(prodDb);
-}
+var connection = mysql.createConnection(gcloudDb);
+// if (process.env.NODE_ENV === 'test') {
+//     connection = mysql.createConnection(prodDb);
+// } else {
+//     connection = mysql.createConnection(prodDb);
+// }
 
 /*
 * Checks to see if the event code exists in the DB
@@ -99,9 +107,9 @@ module.exports = {
             callback(err, Math.floor(Math.random() * numbers.length));
         });
     },
-    
+
     /*
-    * Retrieves information about an event by using the event code. 
+    * Retrieves information about an event by using the event code.
     * Stores the information in an event object.
     */
     retrieveEventByEventCode: function (eventCode, callback) {
@@ -147,7 +155,7 @@ module.exports = {
             callback(err, images);
         })
     },
-    
+
     /*
     * Retrieves images from DB with an image ID.
     * Stores the image path to be used to retrieve actual image.
@@ -166,7 +174,7 @@ module.exports = {
             callback(err, image);
         })
     },
-    
+
     /*
     * Generates and event code and checks if it doesn't exist
     * inserts event with newly generated code
@@ -194,8 +202,8 @@ module.exports = {
 
         });
     },
-    
-    
+
+
     /*
     * Inserts new data into image table
     */
@@ -222,7 +230,7 @@ module.exports = {
             callback(err, result);
         });
     },
-    
+
     /*
     * Deletes an event by its code
     */
@@ -232,7 +240,7 @@ module.exports = {
             callback(err, rows);
         });
     },
-    
+
     /*
     * Deletes an image by its ID
     */
