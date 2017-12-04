@@ -16,10 +16,11 @@ h1,p {
   border-color: yellow;
 }
 
-input[type=file]  {
+/*input[type=file]  {
   padding:5px;
   border:2px solid #ccc;
   -webkit-border-radius: 5px;
   border-radius: 5px;
   border-color:#333;
 }
+*/
