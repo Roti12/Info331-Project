@@ -1,18 +1,25 @@
-#content{
+#content {
   text-align: center;
 }
 
-div h1,h2,h3{
-    color:#1ea176;
+div h1, h2, h3 {
+  color: #1ea176;
 }
 
-#btn{
-color: #fff;
-background-color: #1ea176;
-border-color: #fff;
+#btn {
+  color: #fff;
+  background-color: #1ea176;
+  border-color: #fff;
 }
-#btn:hover{
-color: yellow;
-background-color: #1ea176;
-border-color: yellow;
+
+#btn:hover {
+  color: yellow;
+  background-color: #1ea176;
+  border-color: yellow;
+}
+
+#icon {
+  font-size: -webkit-xxx-large;
+  color: #1ea176;
+  text-align: center;
 }

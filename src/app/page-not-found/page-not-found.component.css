@@ -1,5 +1,14 @@
-h1, p{
-  color:#1ea176;
+h1, p {
+  color: #1ea176;
   text-align: center;
 }
-h1{font-weight: bold;}
+
+h1 {
+  font-weight: bold;
+}
+
+#icon {
+  font-size: -webkit-xxx-large;
+  color: #1ea176;
+  text-align: center;
+}
