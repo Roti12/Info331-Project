@@ -4,7 +4,7 @@ process.env.NODE_ENV = 'test';
 //Require the dev-dependencies
 var chai = require('chai');
 var chaiHttp = require('chai-http');
-var server = require('../server/routes/api');
+var server = require('../server');
 var db = require('../server/routes/db');
 // var fs = require('fs');
 // var logger = require('../utils/logger');
@@ -41,7 +41,7 @@ describe('Images', () => {
     describe('/GET /events/:eventcode/images', () => {
         it('it should GET all the images for the specified event', (done) => {
             var event = {
-                code: 1000,
+                code: 0,
                 optPassword: "123",
                 adminPassword: "admin123",
                 startDate: "2017-11-04",
@@ -53,22 +53,22 @@ describe('Images', () => {
             };
             var image = {
                 name: 'test.jpg',
-                path: 'test/test.jpg',
+                path: '0000/test.jpg',
                 size: '23423'
             };
             db.insertEvent(event, function(err) {
                 if(err) throw err;
-                db.insertImage(1000, image, function(err, id){
+                db.insertImage(0, image, function(err, id) {
                     if(err) throw err;
                     chai.request(server)
-                        .get('/events/1000/images')
-                        .end((err, res) => {
-                            res.should.have.status(200);
-                            res.body.should.be.a('array');
-                            res.body.length.should.be.eql(1);
-                            done();
-                        });
-                });
+                      .get('/api/events/0000/images')
+                      .end((err, res) => {
+                        res.should.have.status(200);
+                        res.body.should.be.a('array');
+                        res.body.length.should.be.eql(1);
+                        done();
+                      });
+                  });
             });
         });
         it('it should GET a 204 if the event has no images', (done) => {

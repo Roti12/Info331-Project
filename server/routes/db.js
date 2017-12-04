@@ -8,9 +8,9 @@ var fs = require('fs');
 const testDb = {
     host: "localhost",
     user: "root",
-    password: "root",
-    database: "info331test",
-    port: 3306
+    password: "evntSqlAdmin",
+    database: "evnt_test",
+    port: 3307
 };
 
 //CREATE A POOL INSTEAD?
@@ -38,12 +38,12 @@ const gcloudDb = {
 /*
 * Sets the connection to the live database.
 */
-var connection = mysql.createConnection(gcloudDb);
-// if (process.env.NODE_ENV === 'test') {
-//     connection = mysql.createConnection(prodDb);
-// } else {
-//     connection = mysql.createConnection(prodDb);
-// }
+var connection;
+if (process.env.NODE_ENV === 'test') {
+    connection = mysql.createConnection(testDb);
+} else {
+    connection = mysql.createConnection(gcloudDb);
+}
 
 /*
 * Checks to see if the event code exists in the DB
@@ -93,7 +93,7 @@ module.exports = {
     },
     generateEventCode: function (callback) {
         var numbers = [];
-        for (var i = 0; i <= 9999; i++) {
+        for (var i = 1; i <= 9999; i++) {
             numbers.push(i);
         }
         connection.query("SELECT event_code FROM events", function(err, rows) {
@@ -104,7 +104,7 @@ module.exports = {
                     numbers.splice(index, 1);
                 }
             });
-            callback(err, Math.floor(Math.random() * numbers.length));
+            callback(err, numbers[Math.floor(Math.random() * (numbers.length - 1))]);
         });
     },
 
