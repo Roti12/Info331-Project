@@ -151,7 +151,7 @@ app.get("/events/:eventcode/images", function (req, res, next) {
             }
           );
         });
-        var labelImage = function(image, index, callback) {
+        var labelImage = function(image, index, callback) { // labels that will contain degree of likelihood for inappropriate content in images.
             const gcsPath = 'gs://eventpictures/' + image.path;
             console.log(gcsPath);
             // Performs safe search property detection on the remote file
@@ -253,6 +253,10 @@ app.post("/events/:eventcode/images", function (req, res,next) {
 
 
 });
+
+/*
+* Method for processing event login requests.
+*/
 
 app.post("/events/:eventcode/login", function (req, res) {
     var eCode = req.params.eventcode;
