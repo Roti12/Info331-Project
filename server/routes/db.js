@@ -21,10 +21,6 @@ const prodDb = {
     password: "rWNaHXbxq6",
     database: "sql11198291",
     port: 3306,
-
-    //dev-range-182012:europe-west1:eventphotodb
-    //root
-    //thisisnotkahoot
 };
 
 const gcloudDb = {

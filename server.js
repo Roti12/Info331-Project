@@ -28,6 +28,7 @@ app.set('port', port);
 
 const server = http.createServer(app);
 
+// Server runs here, listening on port
 server.listen(port, () => console.log(`Running on localhost:${port}`));
 
 module.exports = app;

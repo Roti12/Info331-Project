@@ -1,7 +1,3 @@
-const db = require('./db.js');
-
-
-
 module.exports = {
     
     authenticate: function(stringInput, optPassword, admPassword) {
